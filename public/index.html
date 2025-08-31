@@ -1,320 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Share Boost</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-    <style>
-      body {
-        font-family: "Poppins", sans-serif;
-        background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-        color: #e0e0e0;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 30px;
-      }
-      .wrapper-container {
-        max-width: 850px;
-        width: 100%;
-      }
-      .container {
-        background: rgba(20, 20, 20, 0.8);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 25px;
-        margin-bottom: 25px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-      }
-      h1 {
-        font-size: 2rem;
-        color: #9a77ff;
-        text-align: center;
-        margin-bottom: 10px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShareBoost – Facebook Share Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f0f17;
+      color: #eee;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      color: #ff4ecd;
+      margin-top: 20px;
+    }
+    .tagline {
+      font-size: 18px;
+      margin-bottom: 20px;
+      min-height: 24px;
+      color: #aaa;
+    }
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #1a1a27;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      text-align: left;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-bottom: 10px;
+      background: #2a2a3d;
+      color: #eee;
+    }
+    button {
+      width: 48%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    #submit-button {
+      background: #ff4ecd;
+      color: white;
+    }
+    #submit-button:hover {
+      background: #e03bb3;
+    }
+    #stop-button {
+      background: #444;
+      color: #eee;
+    }
+    #stop-button:hover {
+      background: #666;
+    }
+    .btn-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    #result {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+    }
+    #process-container {
+      margin: 20px auto;
+      max-width: 450px;
+      background: #1c1c2b;
+      border-radius: 10px;
+      padding: 15px;
+      display: none;
+    }
+    #share-summary {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #ff4ecd;
+    }
+    .current-online {
+      margin: 5px 0;
+      background: #2a2a3d;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
+  <div class="tagline" id="tagline"></div>
 
-      /* Typing effect */
-      .typing {
-        font-size: 14px;
-        color: #aaa;
-        text-align: center;
-        border-right: 2px solid #77c7ff;
-        white-space: nowrap;
-        overflow: hidden;
-        width: 0;
-        margin: 0 auto;
-        animation: typing 4s steps(60, end) forwards, blink .75s step-end infinite;
-      }
-      @keyframes typing {
-        from { width: 0 }
-        to { width: 100% }
-      }
-      @keyframes blink {
-        50% { border-color: transparent }
-      }
+  <form onsubmit="submitForm(event)">
+    <label><i class="fa-solid fa-key"></i> AppState:</label>
+    <input type="text" id="cookies" placeholder="Enter AppState" required>
 
-      .form-item {
-        margin-bottom: 15px;
-      }
-      label {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 6px;
-        display: flex;
-        align-items: center;
-        color: #d1d1d1;
-      }
-      label i {
-        margin-right: 8px;
-        color: #77c7ff;
-      }
-      input {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.05);
-        color: #fff;
-        font-size: 15px;
-      }
-      input:focus {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid #9a77ff;
-        outline: none;
-      }
-      .btn-group {
-        display: flex;
-        gap: 10px;
-      }
-      button {
-        flex: 1;
-        padding: 14px;
-        font-size: 16px;
-        font-weight: bold;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        background: linear-gradient(135deg, #9a77ff, #77c7ff);
-        color: #0a0a0a;
-        transition: all 0.3s;
-        box-shadow: 0 0 15px rgba(154, 119, 255, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
-      button:hover {
-        background: linear-gradient(135deg, #77c7ff, #9a77ff);
-        box-shadow: 0 0 20px rgba(154, 119, 255, 0.7);
-        transform: translateY(-2px);
-      }
-      .stop-btn {
-        background: linear-gradient(135deg, #ff6b6b, #ff8787);
-        box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
-      }
-      .stop-btn:hover {
-        background: linear-gradient(135deg, #ff8787, #ff6b6b);
-        box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
-      }
-      #result {
-        display: none;
-        text-align: center;
-        background-color: #181818;
-        border: 1px solid #333;
-        padding: 12px;
-        border-radius: 10px;
-        font-size: 14px;
-        margin-top: 15px;
-      }
-      .current-online {
-        font-size: 14px;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 12px;
-        color: #e0e0e0;
-        border: 1px solid rgba(154, 119, 255, 0.3);
-        border-radius: 10px;
-        margin-bottom: 10px;
-      }
-      /* Processing summary counter */
-      #share-summary {
-        margin-top: 20px;
-        padding: 15px;
-        text-align: center;
-        background: rgba(154, 119, 255, 0.1);
-        border: 1px solid rgba(154, 119, 255, 0.4);
-        border-radius: 10px;
-        font-size: 16px;
-        font-weight: 600;
-        color: #77c7ff;
-        box-shadow: 0 0 15px rgba(154, 119, 255, 0.3);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrapper-container">
-      <div class="container">
-        <h1><i class="fa-solid fa-rocket"></i> SHARE BOOST</h1>
-        <p class="typing">Automated tool that boosts your Facebook shares using AppState.</p>
-      </div>
+    <label><i class="fa-solid fa-link"></i> Link:</label>
+    <input type="text" id="urls" placeholder="Enter Link" required>
 
-      <!-- Form -->
-      <div class="form-wrapper container">
-        <form onsubmit="submitForm(event)" class="form-container">
-          <div class="form-item">
-            <label for="cookies"><i class="fa-solid fa-key"></i> APPSTATE:</label>
-            <input type="text" id="cookies" name="cookie" />
-          </div>
-          <div class="form-item">
-            <label for="urls"><i class="fa-solid fa-link"></i> LINK:</label>
-            <input type="text" id="urls" name="url" />
-          </div>
-          <div class="form-item">
-            <label for="amounts"><i class="fa-solid fa-hashtag"></i> LIMIT:</label>
-            <input type="text" id="amounts" name="amount" />
-          </div>
-          <div class="form-item">
-            <label for="intervals"><i class="fa-solid fa-clock"></i> DELAY (s):</label>
-            <input type="text" id="intervals" name="interval" pattern="[0-9]*" />
-          </div>
-          <div class="form-item btn-group">
-            <button type="submit" id="submit-button">
-              <i class="fa-solid fa-share-nodes"></i> Start Sharing
-            </button>
-            <button type="button" class="stop-btn" id="stop-button">
-              <i class="fa-solid fa-stop"></i> Stop
-            </button>
-          </div>
-          <div class="form-item">
-            <div id="result"></div>
-          </div>
-        </form>
-      </div>
+    <label><i class="fa-solid fa-hashtag"></i> Limit:</label>
+    <input type="number" id="amounts" placeholder="Enter Limit" required>
 
-      <!-- Processing -->
-      <div class="container" id="process-container">
-        <h1><i class="fa-solid fa-chart-line"></i> PROCESSING</h1>
-        <div id="processing"></div>
-      </div>
+    <label><i class="fa-solid fa-clock"></i> Interval (ms):</label>
+    <input type="number" id="intervals" placeholder="Enter Interval" required>
 
-      <!-- Summary Counter -->
-      <div id="share-summary"><i class="fa-solid fa-chart-pie"></i> Total Shares: 0</div>
+    <div class="btn-container">
+      <button type="submit" id="submit-button"><i class="fa-solid fa-play"></i> Start</button>
+      <button type="button" id="stop-button"><i class="fa-solid fa-stop"></i> Stop</button>
     </div>
+    <div id="result"></div>
+  </form>
 
-    <script>
-      let refreshInterval;
+  <div id="process-container">
+    <h3><i class="fa-solid fa-chart-line"></i> Processing</h3>
+    <div id="processing"></div>
+    <div id="share-summary"></div>
+  </div>
 
-      async function submitForm(event) {
-        event.preventDefault();
-        const result = document.getElementById("result");
-        const button = document.getElementById("submit-button");
+  <script>
+    let refreshInterval;
+    let currentId = null;
+
+    // Typing effect for tagline
+    const text = "Automated tool that boosts your Facebook shares using AppState.";
+    let i = 0;
+    function typeWriter() {
+      if (i < text.length) {
+        document.getElementById("tagline").innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typeWriter, 50);
+      }
+    }
+    typeWriter();
+
+    async function submitForm(event) {
+      event.preventDefault();
+      const result = document.getElementById("result");
+      const button = document.getElementById("submit-button");
+      try {
+        result.style.display = "block";
+        button.disabled = true;
+        result.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+        const response = await fetch("/api/submit", {
+          method: "POST",
+          body: JSON.stringify({
+            cookie: document.getElementById("cookies").value,
+            url: document.getElementById("urls").value,
+            amount: document.getElementById("amounts").value,
+            interval: document.getElementById("intervals").value,
+          }),
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await response.json();
+        if (data.status === 200) {
+          currentId = data.id;
+          result.style.backgroundColor = "#1e4620";
+          result.style.color = "#32ff7e";
+          result.innerHTML = '<i class="fa-solid fa-circle-check"></i> Submitted successfully!';
+        } else {
+          result.style.backgroundColor = "#3D1619";
+          result.style.color = "#FE6265";
+          result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: ' + data.error;
+        }
+        button.disabled = false;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function linkOfProcessing() {
+      const container = document.getElementById("processing");
+      const summary = document.getElementById("share-summary");
+      const processContainer = document.getElementById("process-container");
+
+      const refresh = async () => {
         try {
-          result.style.display = "block";
-          button.disabled = true;
-          result.innerHTML =
-            '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-          const response = await fetch("/api/submit", {
-            method: "POST",
-            body: JSON.stringify({
-              cookie: document.getElementById("cookies").value,
-              url: document.getElementById("urls").value,
-              amount: document.getElementById("amounts").value,
-              interval: document.getElementById("intervals").value,
-            }),
-            headers: { "Content-Type": "application/json" },
+          const res = await fetch("/total");
+          if (!res.ok) return;
+          const data = await res.json();
+
+          container.innerHTML = "";
+          let totalCount = 0;
+          let totalTarget = 0;
+
+          if (data.length === 0) {
+            processContainer.style.display = "none";
+            summary.innerHTML = '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
+            return;
+          }
+
+          processContainer.style.display = "block";
+
+          data.forEach((link, index) => {
+            let { count, id, target } = link;
+            totalCount += count;
+            totalTarget += parseInt(target);
+
+            const processCard = document.createElement("div");
+            processCard.classList.add("current-online");
+            processCard.innerHTML = `<i class="fa-solid fa-link"></i> ${index + 1}. ID: ${id} | ${count}/${target}`;
+            container.appendChild(processCard);
           });
-          const data = await response.json();
-          if (data.status === 200) {
-            result.style.backgroundColor = "#1e4620";
-            result.style.color = "#32ff7e";
-            result.innerHTML =
-              '<i class="fa-solid fa-circle-check"></i> Submitted successfully!';
-          } else {
-            result.style.backgroundColor = "#3D1619";
-            result.style.color = "#FE6265";
-            result.innerHTML =
-              '<i class="fa-solid fa-circle-xmark"></i> Error: ' + data.error;
-          }
-          button.disabled = false;
-        } catch (e) {
-          console.error(e);
-        }
-      }
 
-      async function linkOfProcessing() {
-        const container = document.getElementById("processing");
-        const summary = document.getElementById("share-summary");
-        const processContainer = document.getElementById("process-container");
-
-        const refresh = async () => {
-          try {
-            const res = await fetch("/total");
-            if (!res.ok) return;
-            const data = await res.json();
-
-            container.innerHTML = ""; // clear old
-            let totalCount = 0;
-            let totalTarget = 0;
-
-            if (data.length === 0) {
-              processContainer.style.display = "none";
-              summary.innerHTML =
-                '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
-              return;
-            }
-
-            processContainer.style.display = "block";
-
-            data.forEach((link, index) => {
-              let { count, id, target } = link;
-              totalCount += count;
-              totalTarget += parseInt(target);
-
-              const processCard = document.createElement("div");
-              processCard.classList.add("current-online");
-              processCard.innerHTML = `<i class="fa-solid fa-link"></i> ${index + 1}. ID: ${id} | ${count}/${target}`;
-              container.appendChild(processCard);
-            });
-
-            summary.innerHTML = `<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
-          } catch (err) {
-            console.error(err);
-          }
-        };
-
-        refreshInterval = setInterval(refresh, 1000);
-        refresh();
-      }
-      linkOfProcessing();
-
-      // STOP button functionality
-      document.getElementById("stop-button").addEventListener("click", async () => {
-        try {
-          const res = await fetch("/api/stop", { method: "POST" });
-          if (res.ok) {
-            if (refreshInterval) {
-              clearInterval(refreshInterval);
-              refreshInterval = null;
-            }
-            document.getElementById("processing").innerHTML =
-              '<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.';
-            document.getElementById("share-summary").innerHTML =
-              '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
-          }
+          summary.innerHTML = `<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
         } catch (err) {
-          console.error("Stop request failed", err);
+          console.error(err);
         }
-      });
-    </script>
-  </body>
+      };
+
+      refreshInterval = setInterval(refresh, 1000);
+      refresh();
+    }
+    linkOfProcessing();
+
+    // STOP button
+    document.getElementById("stop-button").addEventListener("click", async () => {
+      if (!currentId) {
+        alert("⚠️ No active session to stop!");
+        return;
+      }
+      try {
+        const res = await fetch("/api/stop", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: currentId }),
+        });
+        const data = await res.json();
+        if (data.status === 200) {
+          if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+          }
+          document.getElementById("processing").innerHTML =
+            '<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.';
+          document.getElementById("share-summary").innerHTML =
+            '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
+          currentId = null;
+        } else {
+          alert("Error: " + (data.error || "Unknown"));
+        }
+      } catch (err) {
+        console.error("Stop request failed", err);
+      }
+    });
+  </script>
+</body>
 </html>
