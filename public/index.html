@@ -49,6 +49,30 @@
     .label-icon i { transition: 0.2s; }
     .label-icon:hover i { transform: scale(1.2); color: #fff; }
 
+    .tooltip {
+      display: inline-block;
+      position: relative;
+      cursor: help;
+      color: #ff4ecd;
+      margin-left: 5px;
+      font-size: 14px;
+    }
+    .tooltip:hover::after {
+      content: attr(data-text);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      font-size: 12px;
+      z-index: 100;
+    }
+    body.light-mode .tooltip:hover::after { background: #555; color: #fff; }
+
     input {
       width: 100%;
       padding: 10px;
@@ -115,25 +139,41 @@
     .status-icon { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
     .progress-container { width: 100%; background: #333; border-radius: 8px; overflow: hidden; height: 10px; margin-top: 4px; transition: background 0.3s; }
     body.light-mode .progress-container { background: #ddd; }
-    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #32ff7e, #ff4ecd); transition: width 0.3s ease-in-out; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #32ff7e, #ff4ecd); transition: width 0.5s ease-in-out; }
 
-    #mode-toggle {
+    #mode-toggle-container {
       position: fixed;
       top: 10px;
       right: 10px;
-      background: #ff4ecd;
-      color: #fff;
-      border: none;
-      padding: 5px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 14px;
       z-index: 999;
-      transition: 0.3s;
     }
-    #mode-toggle:hover { background: #e03bb3; }
-    body.light-mode #mode-toggle { background: #e91e63; }
-    body.light-mode #mode-toggle:hover { background: #d81b60; }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0;
+      right: 0; bottom: 0;
+      background-color: #ff4ecd;
+      transition: .4s;
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px; width: 20px;
+      left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #e91e63; }
+    input:checked + .slider:before { transform: translateX(24px); }
 
     #auth-container input { width: calc(100% - 20px); padding: 8px; margin-bottom: 8px; }
     #auth-container button { width: calc(50% - 5px); padding: 8px; margin-bottom: 8px; font-size: 14px; }
@@ -156,7 +196,12 @@
 </head>
 <body>
 
-  <button id="mode-toggle"><i class="fa-solid fa-moon"></i></button>
+  <div id="mode-toggle-container">
+    <label class="switch">
+      <input type="checkbox" id="mode-toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
 
   <h1><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
   <div class="tagline" id="tagline"></div>
@@ -164,6 +209,7 @@
   <div id="auth-container">
     <input type="text" id="auth-username" placeholder="Username" required>
     <input type="password" id="auth-password" placeholder="Password" required>
+    <label style="font-size:14px; display:flex; align-items:center; gap:6px;"><input type="checkbox" id="remember-me"> Remember Me</label>
     <div class="auth-btns">
       <button onclick="login()">Login</button>
       <button onclick="signup()">Create Account</button>
@@ -171,20 +217,20 @@
   </div>
 
   <form id="main-form" onsubmit="submitForm(event)" style="display:none;">
-    <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState:</label>
+    <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState <span class="tooltip" data-text="Paste your Facebook AppState or cookie string">?</span>:</label>
     <div style="display:flex; gap:5px; align-items:center; margin-bottom:5px;">
       <input type="text" id="cookies" placeholder="Enter AppState or Cookie String" required style="flex:1;">
       <button type="button" id="convert-button" style="flex:none; padding:10px; border-radius:8px; background:#444; color:#eee; border:none; cursor:pointer;">Convert</button>
     </div>
     <div id="cookie-feedback"></div>
 
-    <label class="label-icon"><i class="fa-solid fa-link"></i> Link:</label>
+    <label class="label-icon"><i class="fa-solid fa-link"></i> Link <span class="tooltip" data-text="Enter the Facebook post link you want to boost">?</span>:</label>
     <input type="text" id="urls" placeholder="Enter Link" required>
 
-    <label class="label-icon"><i class="fa-solid fa-hashtag"></i> Limit:</label>
+    <label class="label-icon"><i class="fa-solid fa-hashtag"></i> Limit <span class="tooltip" data-text="Number of shares per session">?</span>:</label>
     <input type="number" id="amounts" placeholder="Enter Limit" required>
 
-    <label class="label-icon"><i class="fa-solid fa-clock"></i> Interval (ms):</label>
+    <label class="label-icon"><i class="fa-solid fa-clock"></i> Interval (ms) <span class="tooltip" data-text="Delay between shares in milliseconds">?</span>:</label>
     <input type="number" id="intervals" placeholder="Enter Interval" required>
 
     <div class="btn-container">
@@ -211,9 +257,13 @@
 
   <script>
     const toggleBtn = document.getElementById('mode-toggle');
-    toggleBtn.addEventListener('click', () => {
+    if(localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light-mode');
+      toggleBtn.checked = true;
+    }
+    toggleBtn.addEventListener('change', () => {
       document.body.classList.toggle('light-mode');
-      toggleBtn.innerHTML = document.body.classList.contains('light-mode') ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+      localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
     });
 
     const text = "Automated tool that boosts your Facebook shares using AppState.";
@@ -236,6 +286,20 @@
       usersNum.textContent = Object.keys(users).length;
     }
 
+    // Check if user is already logged in
+    window.addEventListener('load', () => {
+      const loggedInUser = localStorage.getItem('currentUser');
+      const rememberedUser = localStorage.getItem('rememberedUser');
+      if(loggedInUser){
+        authContainer.style.display = 'none';
+        mainForm.style.display = 'block';
+      }
+      if(rememberedUser){
+        document.getElementById('auth-username').value = rememberedUser;
+        document.getElementById('remember-me').checked = true;
+      }
+    });
+
     function signup() {
       const username = document.getElementById('auth-username').value.trim();
       const password = document.getElementById('auth-password').value.trim();
@@ -255,6 +319,12 @@
       let users = JSON.parse(localStorage.getItem('users') || '{}');
       if(users[username] && users[username] === password){
         alert('Login successful!');
+        localStorage.setItem('currentUser', username); // store logged-in user
+        if(document.getElementById('remember-me').checked){
+          localStorage.setItem('rememberedUser', username);
+        } else {
+          localStorage.removeItem('rememberedUser');
+        }
         authContainer.style.display = 'none';
         mainForm.style.display = 'block';
         updateUserCount();
@@ -287,8 +357,17 @@
           headers: { "Content-Type": "application/json" },
         });
         const data = await response.json();
-        if(data.status===200){ currentId=data.id; result.style.backgroundColor="#1e4620"; result.style.color="#32ff7e"; result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; }
-        else{ result.style.backgroundColor="#3D1619"; result.style.color="#FE6265"; result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Error: '+data.error; }
+        if(data.status===200){ 
+          currentId=data.id; 
+          result.style.backgroundColor="#1e4620"; 
+          result.style.color="#32ff7e"; 
+          result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; 
+        }
+        else{ 
+          result.style.backgroundColor="#3D1619"; 
+          result.style.color="#FE6265"; 
+          result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Error: '+data.error; 
+        }
         button.disabled=false;
       }catch(e){ console.error(e); }
     }
