@@ -53,14 +53,17 @@
       width: 100%;
       padding: 10px;
       border-radius: 8px;
-      border: none;
+      border: 2px solid transparent;
       outline: none;
       margin-bottom: 10px;
       background: #2a2a3d;
       color: #eee;
-      transition: background 0.3s, color 0.3s, border 0.2s;
+      transition: background 0.3s, color 0.3s, border 0.3s;
     }
     body.light-mode input { background: #f1f1f1; color: #222; }
+
+    input.invalid { border: 2px solid #ff4e4e; }
+    input.valid { border: 2px solid #32ff7e; }
 
     button {
       width: 48%;
@@ -139,7 +142,6 @@
       transition: background 0.3s, color 0.3s;
     }
     body.light-mode #user-count { background: #eee; color: #222; }
-    #cookie-validation-msg { font-size:12px; text-align:left; margin-top:-8px; margin-bottom:8px; }
   </style>
 </head>
 <body>
@@ -160,11 +162,10 @@
 
   <form id="main-form" onsubmit="submitForm(event)" style="display:none;">
     <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState:</label>
-    <div style="display:flex; gap:5px; align-items:center; margin-bottom:5px;">
+    <div style="display:flex; gap:5px; align-items:center; margin-bottom:10px;">
       <input type="text" id="cookies" placeholder="Enter AppState or Cookie String" required style="flex:1;">
-      <button type="button" id="convert-button" style="flex:none; padding:10px; border-radius:8px; background:#444; color:#eee; border:none; cursor:pointer;">Convert</button>
+      <button type="button" id="convert-button" style="flex:none; padding:5px 10px; border-radius:8px; background:#444; color:#eee; border:none; cursor:pointer;">Convert</button>
     </div>
-    <div id="cookie-validation-msg"></div>
 
     <label class="label-icon"><i class="fa-solid fa-link"></i> Link:</label>
     <input type="text" id="urls" placeholder="Enter Link" required>
@@ -345,44 +346,57 @@
       }
     });
 
-    // --- Cookie live validation + Convert ---
+    // NEW: Convert cookie string to AppState JSON with live validation
     const cookieInput = document.getElementById('cookies');
     const convertBtn = document.getElementById('convert-button');
-    const cookieMsg = document.getElementById('cookie-validation-msg');
 
-    function validateCookie(str) {
-      if (!str) return false;
-      const parts = str.split(';');
-      for (let part of parts) {
-        part = part.trim();
-        if (!part.includes('=')) return false;
-      }
-      return true;
+    function validateCookie(str){
+      return /[a-zA-Z0-9_]+=[^;]+(;|$)/.test(str.trim());
     }
 
-    cookieInput.addEventListener('input', () => {
-      const isValid = validateCookie(cookieInput.value);
-      if(isValid){
-        cookieInput.style.border = '2px solid #32ff7e';
-        cookieMsg.style.color = '#32ff7e';
-        cookieMsg.textContent = 'Valid cookie';
-      } else {
-        cookieInput.style.border = '2px solid #ff4e4e';
-        cookieMsg.style.color = '#ff4e4e';
-        cookieMsg.textContent = 'Not valid cookie';
+    cookieInput.addEventListener('input', ()=>{
+      if(!cookieInput.value.trim()){
+        cookieInput.classList.remove('valid','invalid');
+      } else if(validateCookie(cookieInput.value)){
+        cookieInput.classList.add('valid');
+        cookieInput.classList.remove('invalid');
+      } else{
+        cookieInput.classList.add('invalid');
+        cookieInput.classList.remove('valid');
       }
     });
 
-    convertBtn.addEventListener('click', () => {
-      const val = cookieInput.value.trim();
-      if(!val){
-        alert('Enter a cookie/AppState first');
+    convertBtn.addEventListener('click', ()=>{
+      const cookieStr = cookieInput.value.trim();
+      if(!cookieStr) return alert('Enter cookie string first!');
+      if(!validateCookie(cookieStr)){
+        alert('Not valid cookie');
         return;
       }
-      // Dummy convert logic (replace this with real AppState conversion)
-      cookieInput.value = btoa(val); 
-      cookieInput.dispatchEvent(new Event('input'));
-      alert('Converted!');
+      try{
+        const now = Date.now();
+        const appState = cookieStr.split(';').map(c => {
+          let [key, ...rest] = c.trim().split('=');
+          return {
+            key: key,
+            value: rest.join('='),
+            domain: ".facebook.com",
+            path: "/",
+            hostOnly: false,
+            creation: now,
+            lastAccessed: now
+          };
+        });
+        cookieInput.value = JSON.stringify(appState,null,2);
+        cookieInput.classList.add('valid');
+        cookieInput.classList.remove('invalid');
+        alert('Cookie converted to AppState!');
+      }catch(e){
+        alert('Failed to convert cookie. Check format.');
+        cookieInput.classList.add('invalid');
+        cookieInput.classList.remove('valid');
+        console.error(e);
+      }
     });
   </script>
 </body>
