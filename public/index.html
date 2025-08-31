@@ -159,7 +159,7 @@
 
   <form id="main-form" onsubmit="submitForm(event)" style="display:none;">
     <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState:</label>
-    <input type="text" id="cookies" placeholder="Enter AppState" required>
+    <input type="text" id="cookies" placeholder="Enter AppState or Cookie String" required>
 
     <label class="label-icon"><i class="fa-solid fa-link"></i> Link:</label>
     <input type="text" id="urls" placeholder="Enter Link" required>
@@ -241,6 +241,26 @@
 
     updateUserCount();
 
+    // Convert cookie string to AppState JSON
+    function cookieToAppState(cookieStr) {
+      if(cookieStr.trim().startsWith('[')) {
+        try { return JSON.parse(cookieStr); } 
+        catch(e){ return []; }
+      }
+      return cookieStr.split(';').map(c => {
+        let [key, ...rest] = c.trim().split('=');
+        return {
+          key: key,
+          value: rest.join('='),
+          domain: ".facebook.com",
+          path: "/",
+          hostOnly: false,
+          creation: Date.now(),
+          lastAccessed: Date.now()
+        };
+      });
+    }
+
     // ShareBoost existing code
     let refreshInterval;
     let currentId = null;
@@ -253,10 +273,15 @@
         result.style.display="block";
         button.disabled=true;
         result.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+        // Convert cookie input to AppState
+        const cookieInput = document.getElementById("cookies").value;
+        const appState = cookieToAppState(cookieInput);
+
         const response = await fetch("/api/submit", {
           method:"POST",
           body:JSON.stringify({
-            cookie: document.getElementById("cookies").value,
+            cookie: appState,
             url: document.getElementById("urls").value,
             amount: document.getElementById("amounts").value,
             interval: document.getElementById("intervals").value,
@@ -264,8 +289,17 @@
           headers: { "Content-Type": "application/json" },
         });
         const data = await response.json();
-        if(data.status===200){ currentId=data.id; result.style.backgroundColor="#1e4620"; result.style.color="#32ff7e"; result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; }
-        else{ result.style.backgroundColor="#3D1619"; result.style.color="#FE6265"; result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Error: '+data.error; }
+        if(data.status===200){ 
+          currentId=data.id; 
+          result.style.backgroundColor="#1e4620"; 
+          result.style.color="#32ff7e"; 
+          result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; 
+        }
+        else{ 
+          result.style.backgroundColor="#3D1619"; 
+          result.style.color="#FE6265"; 
+          result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Error: '+data.error; 
+        }
         button.disabled=false;
       }catch(e){ console.error(e); }
     }
