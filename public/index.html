@@ -120,6 +120,11 @@
       font-size: 14px;
       text-align: left;
       display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .status-row {
+      display: flex;
       align-items: center;
       gap: 6px;
     }
@@ -128,6 +133,21 @@
       height: 16px;
       border-radius: 50%;
       display: inline-block;
+    }
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      background: #333;
+      border-radius: 8px;
+      overflow: hidden;
+      height: 10px;
+      margin-top: 4px;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #32ff7e, #ff4ecd);
+      transition: width 0.3s ease-in-out;
     }
   </style>
 </head>
@@ -243,11 +263,21 @@
             const processCard = document.createElement("div");
             processCard.classList.add("current-online");
 
-            let color = "#ffc107"; // pending default
+            // Status color
+            let color = "#ffc107"; // pending
             if (status === "success") color = "#32ff7e";
             if (status === "failed") color = "#ff4e4e";
 
-            processCard.innerHTML = `<span class="status-icon" style="background:${color}"></span> ${index + 1}. ID: ${id} | ${count}/${target}`;
+            // Card content
+            processCard.innerHTML = `
+              <div class="status-row">
+                <span class="status-icon" style="background:${color}"></span>
+                ${index + 1}. ID: ${id} | ${count}/${target}
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar" style="width:${(count/target)*100}%"></div>
+              </div>
+            `;
             container.appendChild(processCard);
           });
 
