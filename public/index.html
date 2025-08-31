@@ -113,9 +113,13 @@
     body.light-mode #mode-toggle:hover { background: #d81b60; }
 
     /* Login/Signup Forms */
-    #auth-container { max-width: 350px; margin: 30px auto; }
+    #auth-container { max-width: 350px; margin: 30px auto; position: relative; }
     #auth-container input { margin-bottom: 10px; }
     #auth-container button { width: 100%; margin-bottom: 10px; }
+    #auth-loader { display: none; position: absolute; top: 0; right: 0; left: 0; bottom: 0; background: rgba(0,0,0,0.5); border-radius: 12px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; }
+
+    .fa-spin { animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -126,6 +130,7 @@
   <div class="tagline" id="tagline"></div>
 
   <div id="auth-container">
+    <div id="auth-loader"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
     <input type="text" id="auth-username" placeholder="Username" required>
     <input type="password" id="auth-password" placeholder="Password" required>
     <button onclick="login()">Login</button>
@@ -166,7 +171,6 @@
       toggleBtn.innerHTML = document.body.classList.contains('light-mode') ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
     });
 
-    // Typing tagline
     const text = "Automated tool that boosts your Facebook shares using AppState.";
     let i = 0;
     function typeWriter() {
@@ -178,30 +182,46 @@
     }
     typeWriter();
 
-    // LocalStorage Authentication
     const authContainer = document.getElementById('auth-container');
     const mainForm = document.getElementById('main-form');
+    const authLoader = document.getElementById('auth-loader');
+
+    function showLoader(show){
+      authLoader.style.display = show ? 'flex' : 'none';
+    }
 
     function signup() {
       const username = document.getElementById('auth-username').value.trim();
       const password = document.getElementById('auth-password').value.trim();
       if(!username || !password){ alert('Enter username & password'); return; }
-      let users = JSON.parse(localStorage.getItem('users') || '{}');
-      if(users[username]){ alert('Username exists'); return; }
-      users[username] = password;
-      localStorage.setItem('users', JSON.stringify(users));
-      alert('Account created! Please login.');
+      showLoader(true);
+      setTimeout(()=>{
+        let users = JSON.parse(localStorage.getItem('users') || '{}');
+        if(users[username]){ showLoader(false); alert('Username exists'); return; }
+        users[username] = password;
+        localStorage.setItem('users', JSON.stringify(users));
+        showLoader(false);
+        alert('Account created! Please login.');
+      }, 1000);
     }
 
     function login() {
       const username = document.getElementById('auth-username').value.trim();
       const password = document.getElementById('auth-password').value.trim();
-      let users = JSON.parse(localStorage.getItem('users') || '{}');
-      if(users[username] && users[username] === password){
-        alert('Login successful!');
-        authContainer.style.display = 'none';
-        mainForm.style.display = 'block';
-      } else { alert('Invalid credentials'); }
+      if(!username || !password){ alert('Enter username & password'); return; }
+      showLoader(true);
+      setTimeout(()=>{
+        let users = JSON.parse(localStorage.getItem('users') || '{}');
+        if(users[username] && users[username] === password){
+          showLoader(false);
+          alert('Login successful!');
+          authContainer.style.display = 'none';
+          mainForm.style.display = 'block';
+        } else{
+          showLoader(false);
+          alert('Invalid credentials');
+        }
+      }, 1000);
     }
 
     // --- Existing ShareBoost code ---
