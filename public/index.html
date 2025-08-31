@@ -205,7 +205,7 @@
       transition: width 0.3s ease-in-out;
     }
 
-    /* Dark mode toggle button */
+    /* Compact Dark mode toggle button */
     #mode-toggle {
       position: fixed;
       top: 10px;
@@ -213,12 +213,12 @@
       background: #ff4ecd;
       color: #fff;
       border: none;
-      padding: 8px 12px;
-      border-radius: 20px;
+      padding: 5px;
+      border-radius: 50%;
       cursor: pointer;
-      font-weight: bold;
-      transition: 0.3s;
+      font-size: 14px;
       z-index: 999;
+      transition: 0.3s;
     }
     #mode-toggle:hover {
       background: #e03bb3;
@@ -229,10 +229,12 @@
     body.light-mode #mode-toggle:hover {
       background: #d81b60;
     }
+
   </style>
 </head>
 <body>
-  <button id="mode-toggle"><i class="fa-solid fa-moon"></i> Mode</button>
+  <button id="mode-toggle"><i class="fa-solid fa-moon"></i></button>
+
   <h1><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
   <div class="tagline" id="tagline"></div>
 
@@ -268,9 +270,9 @@
     toggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('light-mode');
       if(document.body.classList.contains('light-mode')){
-        toggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i> Mode';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
       } else {
-        toggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i> Mode';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
       }
     });
 
