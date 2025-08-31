@@ -15,26 +15,12 @@
       padding: 0;
       transition: background 0.3s, color 0.3s;
     }
-    body.light-mode {
-      background: #f4f4f4;
-      color: #222;
-    }
-    h1 {
-      color: #ff4ecd;
-      margin-top: 20px;
-    }
-    body.light-mode h1 {
-      color: #e91e63;
-    }
-    .tagline {
-      font-size: 18px;
-      margin-bottom: 20px;
-      min-height: 24px;
-      color: #aaa;
-    }
-    body.light-mode .tagline {
-      color: #555;
-    }
+    body.light-mode { background: #f4f4f4; color: #222; }
+    h1 { color: #ff4ecd; margin-top: 20px; }
+    body.light-mode h1 { color: #e91e63; }
+    .tagline { font-size: 18px; margin-bottom: 20px; min-height: 24px; color: #aaa; }
+    body.light-mode .tagline { color: #555; }
+
     form {
       max-width: 400px;
       margin: 0 auto;
@@ -44,10 +30,7 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       transition: background 0.3s;
     }
-    body.light-mode form {
-      background: #fff;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
+    body.light-mode form { background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 
     .label-icon {
       display: inline-flex;
@@ -62,33 +45,12 @@
       margin-bottom: 5px;
       transition: background 0.3s, color 0.3s;
     }
-    body.light-mode .label-icon {
-      background: #eee;
-      color: #e91e63;
-    }
-    .label-icon i {
-      transition: 0.2s;
-    }
-    .label-icon:hover i {
-      transform: scale(1.2);
-      color: #fff;
-    }
+    body.light-mode .label-icon { background: #eee; color: #e91e63; }
+    .label-icon i { transition: 0.2s; }
+    .label-icon:hover i { transform: scale(1.2); color: #fff; }
 
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      margin-bottom: 10px;
-      background: #2a2a3d;
-      color: #eee;
-      transition: background 0.3s, color 0.3s;
-    }
-    body.light-mode input {
-      background: #f1f1f1;
-      color: #222;
-    }
+    input { width: 100%; padding: 10px; border-radius: 8px; border: none; outline: none; margin-bottom: 10px; background: #2a2a3d; color: #eee; transition: background 0.3s, color 0.3s; }
+    body.light-mode input { background: #f1f1f1; color: #222; }
 
     button {
       width: 48%;
@@ -100,45 +62,18 @@
       font-weight: bold;
       transition: 0.2s;
     }
-    #submit-button {
-      background: #ff4ecd;
-      color: white;
-    }
-    #submit-button:hover {
-      background: #e03bb3;
-    }
-    #stop-button {
-      background: #444;
-      color: #eee;
-    }
-    #stop-button:hover {
-      background: #666;
-    }
-    body.light-mode #submit-button {
-      background: #e91e63;
-    }
-    body.light-mode #submit-button:hover {
-      background: #d81b60;
-    }
-    body.light-mode #stop-button {
-      background: #ccc;
-      color: #222;
-    }
-    body.light-mode #stop-button:hover {
-      background: #bbb;
-    }
+    #submit-button { background: #ff4ecd; color: white; }
+    #submit-button:hover { background: #e03bb3; }
+    #stop-button { background: #444; color: #eee; }
+    #stop-button:hover { background: #666; }
+    body.light-mode #submit-button { background: #e91e63; }
+    body.light-mode #submit-button:hover { background: #d81b60; }
+    body.light-mode #stop-button { background: #ccc; color: #222; }
+    body.light-mode #stop-button:hover { background: #bbb; }
 
-    .btn-container {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    #result {
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: 8px;
-      display: none;
-    }
+    .btn-container { display: flex; justify-content: space-between; gap: 10px; }
+    #result { margin-top: 15px; padding: 10px; border-radius: 8px; display: none; }
+
     #process-container {
       margin: 20px auto;
       max-width: 450px;
@@ -148,64 +83,17 @@
       display: none;
       transition: background 0.3s;
     }
-    body.light-mode #process-container {
-      background: #f1f1f1;
-    }
-    #share-summary {
-      margin-top: 10px;
-      font-weight: bold;
-      color: #ff4ecd;
-    }
-    body.light-mode #share-summary {
-      color: #e91e63;
-    }
-    .current-online {
-      margin: 5px 0;
-      background: #2a2a3d;
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 14px;
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      transition: background 0.3s, color 0.3s;
-    }
-    body.light-mode .current-online {
-      background: #eee;
-      color: #222;
-    }
-    .status-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .status-icon {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .progress-container {
-      width: 100%;
-      background: #333;
-      border-radius: 8px;
-      overflow: hidden;
-      height: 10px;
-      margin-top: 4px;
-      transition: background 0.3s;
-    }
-    body.light-mode .progress-container {
-      background: #ddd;
-    }
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #32ff7e, #ff4ecd);
-      transition: width 0.3s ease-in-out;
-    }
+    body.light-mode #process-container { background: #f1f1f1; }
+    #share-summary { margin-top: 10px; font-weight: bold; color: #ff4ecd; }
+    body.light-mode #share-summary { color: #e91e63; }
+    .current-online { margin: 5px 0; background: #2a2a3d; padding: 8px; border-radius: 8px; font-size: 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; transition: background 0.3s, color 0.3s; }
+    body.light-mode .current-online { background: #eee; color: #222; }
+    .status-row { display: flex; align-items: center; gap: 6px; }
+    .status-icon { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
+    .progress-container { width: 100%; background: #333; border-radius: 8px; overflow: hidden; height: 10px; margin-top: 4px; transition: background 0.3s; }
+    body.light-mode .progress-container { background: #ddd; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #32ff7e, #ff4ecd); transition: width 0.3s ease-in-out; }
 
-    /* Compact Dark mode toggle button */
     #mode-toggle {
       position: fixed;
       top: 10px;
@@ -220,25 +108,31 @@
       z-index: 999;
       transition: 0.3s;
     }
-    #mode-toggle:hover {
-      background: #e03bb3;
-    }
-    body.light-mode #mode-toggle {
-      background: #e91e63;
-    }
-    body.light-mode #mode-toggle:hover {
-      background: #d81b60;
-    }
+    #mode-toggle:hover { background: #e03bb3; }
+    body.light-mode #mode-toggle { background: #e91e63; }
+    body.light-mode #mode-toggle:hover { background: #d81b60; }
 
+    /* Login/Signup Forms */
+    #auth-container { max-width: 350px; margin: 30px auto; }
+    #auth-container input { margin-bottom: 10px; }
+    #auth-container button { width: 100%; margin-bottom: 10px; }
   </style>
 </head>
 <body>
+
   <button id="mode-toggle"><i class="fa-solid fa-moon"></i></button>
 
   <h1><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
   <div class="tagline" id="tagline"></div>
 
-  <form onsubmit="submitForm(event)">
+  <div id="auth-container">
+    <input type="text" id="auth-username" placeholder="Username" required>
+    <input type="password" id="auth-password" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+    <button onclick="signup()">Create Account</button>
+  </div>
+
+  <form id="main-form" onsubmit="submitForm(event)" style="display:none;">
     <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState:</label>
     <input type="text" id="cookies" placeholder="Enter AppState" required>
 
@@ -269,16 +163,10 @@
     const toggleBtn = document.getElementById('mode-toggle');
     toggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('light-mode');
-      if(document.body.classList.contains('light-mode')){
-        toggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-      } else {
-        toggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-      }
+      toggleBtn.innerHTML = document.body.classList.contains('light-mode') ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
     });
 
-    let refreshInterval;
-    let currentId = null;
-
+    // Typing tagline
     const text = "Automated tool that boosts your Facebook shares using AppState.";
     let i = 0;
     function typeWriter() {
@@ -290,17 +178,47 @@
     }
     typeWriter();
 
-    async function submitForm(event) {
+    // LocalStorage Authentication
+    const authContainer = document.getElementById('auth-container');
+    const mainForm = document.getElementById('main-form');
+
+    function signup() {
+      const username = document.getElementById('auth-username').value.trim();
+      const password = document.getElementById('auth-password').value.trim();
+      if(!username || !password){ alert('Enter username & password'); return; }
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      if(users[username]){ alert('Username exists'); return; }
+      users[username] = password;
+      localStorage.setItem('users', JSON.stringify(users));
+      alert('Account created! Please login.');
+    }
+
+    function login() {
+      const username = document.getElementById('auth-username').value.trim();
+      const password = document.getElementById('auth-password').value.trim();
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      if(users[username] && users[username] === password){
+        alert('Login successful!');
+        authContainer.style.display = 'none';
+        mainForm.style.display = 'block';
+      } else { alert('Invalid credentials'); }
+    }
+
+    // --- Existing ShareBoost code ---
+    let refreshInterval;
+    let currentId = null;
+
+    async function submitForm(event){
       event.preventDefault();
       const result = document.getElementById("result");
       const button = document.getElementById("submit-button");
-      try {
-        result.style.display = "block";
-        button.disabled = true;
-        result.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+      try{
+        result.style.display="block";
+        button.disabled=true;
+        result.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
         const response = await fetch("/api/submit", {
-          method: "POST",
-          body: JSON.stringify({
+          method:"POST",
+          body:JSON.stringify({
             cookie: document.getElementById("cookies").value,
             url: document.getElementById("urls").value,
             amount: document.getElementById("amounts").value,
@@ -309,61 +227,46 @@
           headers: { "Content-Type": "application/json" },
         });
         const data = await response.json();
-        if (data.status === 200) {
+        if(data.status===200){
           currentId = data.id;
-          result.style.backgroundColor = "#1e4620";
-          result.style.color = "#32ff7e";
-          result.innerHTML = '<i class="fa-solid fa-circle-check"></i> Submitted successfully!';
-        } else {
-          result.style.backgroundColor = "#3D1619";
-          result.style.color = "#FE6265";
-          result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: ' + data.error;
+          result.style.backgroundColor="#1e4620";
+          result.style.color="#32ff7e";
+          result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!';
+        } else{
+          result.style.backgroundColor="#3D1619";
+          result.style.color="#FE6265";
+          result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Error: '+data.error;
         }
-        button.disabled = false;
-      } catch (e) {
-        console.error(e);
-      }
+        button.disabled=false;
+      } catch(e){ console.error(e); }
     }
 
-    async function linkOfProcessing() {
-      const container = document.getElementById("processing");
-      const summary = document.getElementById("share-summary");
-      const processContainer = document.getElementById("process-container");
+    async function linkOfProcessing(){
+      const container=document.getElementById("processing");
+      const summary=document.getElementById("share-summary");
+      const processContainer=document.getElementById("process-container");
 
-      const refresh = async () => {
-        try {
-          const res = await fetch("/total");
-          if (!res.ok) return;
-          const data = await res.json();
-
-          container.innerHTML = "";
-          let totalCount = 0;
-          let totalTarget = 0;
-
-          if (data.length === 0) {
-            processContainer.style.display = "none";
-            summary.innerHTML = '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
-            return;
-          }
-
-          processContainer.style.display = "block";
-
-          data.forEach((link, index) => {
+      const refresh=async()=>{
+        try{
+          const res=await fetch("/total");
+          if(!res.ok) return;
+          const data=await res.json();
+          container.innerHTML="";
+          let totalCount=0; let totalTarget=0;
+          if(data.length===0){ processContainer.style.display="none"; summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; return; }
+          processContainer.style.display="block";
+          data.forEach((link,index)=>{
             let { count, id, target, status } = link;
-            totalCount += count;
-            totalTarget += parseInt(target);
-
-            const processCard = document.createElement("div");
+            totalCount+=count; totalTarget+=parseInt(target);
+            const processCard=document.createElement("div");
             processCard.classList.add("current-online");
-
-            let color = "#ffc107";
-            if (status === "success") color = "#32ff7e";
-            if (status === "failed") color = "#ff4e4e";
-
-            processCard.innerHTML = `
+            let color="#ffc107";
+            if(status==="success") color="#32ff7e";
+            if(status==="failed") color="#ff4e4e";
+            processCard.innerHTML=`
               <div class="status-row">
                 <span class="status-icon" style="background:${color}"></span>
-                ${index + 1}. ID: ${id} | ${count}/${target}
+                ${index+1}. ID: ${id} | ${count}/${target}
               </div>
               <div class="progress-container">
                 <div class="progress-bar" style="width:${(count/target)*100}%"></div>
@@ -371,46 +274,31 @@
             `;
             container.appendChild(processCard);
           });
-
-          summary.innerHTML = `<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
-        } catch (err) {
-          console.error(err);
-        }
+          summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
+        } catch(err){ console.error(err); }
       };
 
-      refreshInterval = setInterval(refresh, 1000);
+      refreshInterval=setInterval(refresh,1000);
       refresh();
     }
     linkOfProcessing();
 
-    document.getElementById("stop-button").addEventListener("click", async () => {
-      if (!currentId) {
-        alert("⚠️ No active session to stop!");
-        return;
-      }
-      try {
-        const res = await fetch("/api/stop", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: currentId }),
+    document.getElementById("stop-button").addEventListener("click",async()=>{
+      if(!currentId){ alert("⚠️ No active session to stop!"); return; }
+      try{
+        const res=await fetch("/api/stop",{
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({ id:currentId }),
         });
-        const data = await res.json();
-        if (data.status === 200) {
-          if (refreshInterval) {
-            clearInterval(refreshInterval);
-            refreshInterval = null;
-          }
-          document.getElementById("processing").innerHTML =
-            '<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.';
-          document.getElementById("share-summary").innerHTML =
-            '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
-          currentId = null;
-        } else {
-          alert("Error: " + (data.error || "Unknown"));
-        }
-      } catch (err) {
-        console.error("Stop request failed", err);
-      }
+        const data=await res.json();
+        if(data.status===200){
+          if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; }
+          document.getElementById("processing").innerHTML='<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.';
+          document.getElementById("share-summary").innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
+          currentId=null;
+        } else{ alert("Error: "+(data.error||"Unknown")); }
+      } catch(err){ console.error("Stop request failed",err); }
     });
   </script>
 </body>
