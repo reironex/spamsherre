@@ -9,6 +9,10 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
     <style>
       body {
         font-family: "Poppins", sans-serif;
@@ -39,6 +43,27 @@
         text-align: center;
         margin-bottom: 10px;
       }
+
+      /* Typing effect */
+      .typing {
+        font-size: 14px;
+        color: #aaa;
+        text-align: center;
+        border-right: 2px solid #77c7ff;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 0;
+        margin: 0 auto;
+        animation: typing 4s steps(60, end) forwards, blink .75s step-end infinite;
+      }
+      @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
+      }
+      @keyframes blink {
+        50% { border-color: transparent }
+      }
+
       .form-item {
         margin-bottom: 15px;
       }
@@ -46,8 +71,13 @@
         font-size: 14px;
         font-weight: 600;
         margin-bottom: 6px;
-        display: block;
+        display: flex;
+        align-items: center;
         color: #d1d1d1;
+      }
+      label i {
+        margin-right: 8px;
+        color: #77c7ff;
       }
       input {
         width: 100%;
@@ -63,8 +93,12 @@
         border: 1px solid #9a77ff;
         outline: none;
       }
+      .btn-group {
+        display: flex;
+        gap: 10px;
+      }
       button {
-        width: 100%;
+        flex: 1;
         padding: 14px;
         font-size: 16px;
         font-weight: bold;
@@ -75,11 +109,23 @@
         color: #0a0a0a;
         transition: all 0.3s;
         box-shadow: 0 0 15px rgba(154, 119, 255, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
       }
       button:hover {
         background: linear-gradient(135deg, #77c7ff, #9a77ff);
         box-shadow: 0 0 20px rgba(154, 119, 255, 0.7);
         transform: translateY(-2px);
+      }
+      .stop-btn {
+        background: linear-gradient(135deg, #ff6b6b, #ff8787);
+        box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
+      }
+      .stop-btn:hover {
+        background: linear-gradient(135deg, #ff8787, #ff6b6b);
+        box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
       }
       #result {
         display: none;
@@ -118,31 +164,36 @@
   <body>
     <div class="wrapper-container">
       <div class="container">
-        <h1>🚀 SHARE BOOST</h1>
-        <p>Automated tool that boosts your Facebook shares using AppState.</p>
+        <h1><i class="fa-solid fa-rocket"></i> SHARE BOOST</h1>
+        <p class="typing">Automated tool that boosts your Facebook shares using AppState.</p>
       </div>
 
       <!-- Form -->
       <div class="form-wrapper container">
         <form onsubmit="submitForm(event)" class="form-container">
           <div class="form-item">
-            <label for="cookies">APPSTATE:</label>
+            <label for="cookies"><i class="fa-solid fa-key"></i> APPSTATE:</label>
             <input type="text" id="cookies" name="cookie" />
           </div>
           <div class="form-item">
-            <label for="urls">LINK:</label>
+            <label for="urls"><i class="fa-solid fa-link"></i> LINK:</label>
             <input type="text" id="urls" name="url" />
           </div>
           <div class="form-item">
-            <label for="amounts">LIMIT:</label>
+            <label for="amounts"><i class="fa-solid fa-hashtag"></i> LIMIT:</label>
             <input type="text" id="amounts" name="amount" />
           </div>
           <div class="form-item">
-            <label for="intervals">DELAY (s):</label>
+            <label for="intervals"><i class="fa-solid fa-clock"></i> DELAY (s):</label>
             <input type="text" id="intervals" name="interval" pattern="[0-9]*" />
           </div>
-          <div class="form-item">
-            <button type="submit" id="submit-button">🚀 Start Sharing</button>
+          <div class="form-item btn-group">
+            <button type="submit" id="submit-button">
+              <i class="fa-solid fa-share-nodes"></i> Start Sharing
+            </button>
+            <button type="button" class="stop-btn" id="stop-button">
+              <i class="fa-solid fa-stop"></i> Stop
+            </button>
           </div>
           <div class="form-item">
             <div id="result"></div>
@@ -152,15 +203,17 @@
 
       <!-- Processing -->
       <div class="container" id="process-container">
-        <h1>📊 PROCESSING</h1>
+        <h1><i class="fa-solid fa-chart-line"></i> PROCESSING</h1>
         <div id="processing"></div>
       </div>
 
       <!-- Summary Counter -->
-      <div id="share-summary">Total Shares: 0</div>
+      <div id="share-summary"><i class="fa-solid fa-chart-pie"></i> Total Shares: 0</div>
     </div>
 
     <script>
+      let refreshInterval;
+
       async function submitForm(event) {
         event.preventDefault();
         const result = document.getElementById("result");
@@ -168,7 +221,8 @@
         try {
           result.style.display = "block";
           button.disabled = true;
-          result.innerHTML = "⏳ Processing...";
+          result.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
           const response = await fetch("/api/submit", {
             method: "POST",
             body: JSON.stringify({
@@ -183,11 +237,13 @@
           if (data.status === 200) {
             result.style.backgroundColor = "#1e4620";
             result.style.color = "#32ff7e";
-            result.innerHTML = "✅ Submitted successfully!";
+            result.innerHTML =
+              '<i class="fa-solid fa-circle-check"></i> Submitted successfully!';
           } else {
             result.style.backgroundColor = "#3D1619";
             result.style.color = "#FE6265";
-            result.innerHTML = "❌ Error: " + data.error;
+            result.innerHTML =
+              '<i class="fa-solid fa-circle-xmark"></i> Error: ' + data.error;
           }
           button.disabled = false;
         } catch (e) {
@@ -212,7 +268,8 @@
 
             if (data.length === 0) {
               processContainer.style.display = "none";
-              summary.innerText = "Total Shares: 0";
+              summary.innerHTML =
+                '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
               return;
             }
 
@@ -225,21 +282,30 @@
 
               const processCard = document.createElement("div");
               processCard.classList.add("current-online");
-              processCard.innerHTML = `${index + 1}. ID: ${id} | ${count}/${target}`;
+              processCard.innerHTML = `<i class="fa-solid fa-link"></i> ${index + 1}. ID: ${id} | ${count}/${target}`;
               container.appendChild(processCard);
             });
 
-            summary.innerText = `Total Shares: ${totalCount}/${totalTarget}`;
+            summary.innerHTML = `<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
           } catch (err) {
             console.error(err);
           }
         };
 
-        // refresh every second
-        setInterval(refresh, 1000);
+        refreshInterval = setInterval(refresh, 1000);
         refresh();
       }
       linkOfProcessing();
+
+      // STOP button functionality
+      document.getElementById("stop-button").addEventListener("click", () => {
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+          refreshInterval = null;
+          document.getElementById("processing").innerHTML =
+            '<i class="fa-solid fa-circle-stop"></i> Stopped.';
+        }
+      });
     </script>
   </body>
 </html>
