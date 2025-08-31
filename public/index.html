@@ -300,13 +300,44 @@
     linkOfProcessing();
 
     document.getElementById("stop-button").addEventListener("click", async ()=>{
-      if(!currentId){ alert("⚠️ No active session to stop!"); return; }
+      const result = document.getElementById("result");
+      if(!currentId){ 
+        result.style.display = "block";
+        result.style.backgroundColor = "#3D1619";
+        result.style.color = "#FE6265";
+        result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> No active session to stop';
+        return; 
+      }
       try{
-        const res=await fetch("/api/stop",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id:currentId})});
+        const res=await fetch("/api/stop",{ 
+          method:"POST", 
+          headers:{"Content-Type":"application/json"}, 
+          body:JSON.stringify({id:currentId})
+        });
         const data=await res.json();
-        if(data.status===200){ if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; } document.getElementById("processing").innerHTML='<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.'; document.getElementById("share-summary").innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; currentId=null; }
-        else{ alert("Error: "+(data.error||"Unknown")); }
-      }catch(err){ console.error("Stop request failed",err); }
+        if(data.status===200){ 
+          if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; } 
+          document.getElementById("processing").innerHTML='<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.'; 
+          document.getElementById("share-summary").innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; 
+          result.style.display="block";
+          result.style.backgroundColor="#1e4620";
+          result.style.color="#32ff7e";
+          result.innerHTML='<i class="fa-solid fa-circle-check"></i> Session stopped successfully';
+          currentId=null; 
+        }
+        else{ 
+          result.style.display="block";
+          result.style.backgroundColor="#3D1619";
+          result.style.color="#FE6265";
+          result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: '+(data.error||"Unknown");
+        }
+      }catch(err){ 
+        console.error("Stop request failed",err); 
+        result.style.display="block";
+        result.style.backgroundColor="#3D1619";
+        result.style.color="#FE6265";
+        result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Failed to stop session';
+      }
     });
   </script>
 </body>
