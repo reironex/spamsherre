@@ -1,247 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ShareBoost – Facebook Share Tool</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<style>
-body { font-family: Arial, sans-serif; background: #0f0f17; color: #eee; text-align: center; margin: 0; padding: 0; transition: background 0.3s, color 0.3s; }
-body.light-mode { background: #f4f4f4; color: #222; }
-h1 { color: #ff4ecd; margin-top: 20px; }
-body.light-mode h1 { color: #e91e63; }
-.tagline { font-size: 18px; margin-bottom: 20px; min-height: 24px; color: #aaa; }
-body.light-mode .tagline { color: #555; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShareBoost – Facebook Share Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f0f17;
+      color: #eee;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.light-mode { background: #f4f4f4; color: #222; }
+    h1 { color: #ff4ecd; margin-top: 20px; }
+    body.light-mode h1 { color: #e91e63; }
+    .tagline { font-size: 18px; margin-bottom: 20px; min-height: 24px; color: #aaa; }
+    body.light-mode .tagline { color: #555; }
 
-form, #auth-container, #converter {
-  max-width: 400px;
-  margin: 0 auto 20px auto;
-  background: #1a1a27;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-  transition: background 0.3s;
-}
-body.light-mode form, body.light-mode #auth-container, body.light-mode #converter { background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    form, #auth-container {
+      max-width: 400px;
+      margin: 0 auto 20px auto;
+      background: #1a1a27;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      transition: background 0.3s;
+    }
+    body.light-mode form, body.light-mode #auth-container { background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 
-.label-icon { display: inline-flex; align-items: center; gap: 6px; background: #2a2a3d; padding: 4px 8px; border-radius: 12px; font-size: 14px; color: #ff4ecd; font-weight: bold; margin-bottom: 5px; transition: background 0.3s, color 0.3s; }
-body.light-mode .label-icon { background: #eee; color: #e91e63; }
-.label-icon i { transition: 0.2s; }
-.label-icon:hover i { transform: scale(1.2); color: #fff; }
+    .label-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #2a2a3d;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #ff4ecd;
+      font-weight: bold;
+      margin-bottom: 5px;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.light-mode .label-icon { background: #eee; color: #e91e63; }
+    .label-icon i { transition: 0.2s; }
+    .label-icon:hover i { transform: scale(1.2); color: #fff; }
 
-input, textarea { width: 100%; padding: 10px; border-radius: 8px; border: none; outline: none; margin-bottom: 10px; background: #2a2a3d; color: #eee; transition: background 0.3s, color 0.3s; }
-body.light-mode input, body.light-mode textarea { background: #f1f1f1; color: #222; }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-bottom: 10px;
+      background: #2a2a3d;
+      color: #eee;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.light-mode input { background: #f1f1f1; color: #222; }
 
-button { width: 48%; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.2s; }
-#submit-button { background: #ff4ecd; color: white; }
-#submit-button:hover { background: #e03bb3; }
-#stop-button { background: #444; color: #eee; }
-#stop-button:hover { background: #666; }
-body.light-mode #submit-button { background: #e91e63; }
-body.light-mode #submit-button:hover { background: #d81b60; }
-body.light-mode #stop-button { background: #ccc; color: #222; }
-body.light-mode #stop-button:hover { background: #bbb; }
+    button {
+      width: 48%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    #submit-button { background: #ff4ecd; color: white; }
+    #submit-button:hover { background: #e03bb3; }
+    #stop-button { background: #444; color: #eee; }
+    #stop-button:hover { background: #666; }
+    body.light-mode #submit-button { background: #e91e63; }
+    body.light-mode #submit-button:hover { background: #d81b60; }
+    body.light-mode #stop-button { background: #ccc; color: #222; }
+    body.light-mode #stop-button:hover { background: #bbb; }
 
-.btn-container { display: flex; justify-content: space-between; gap: 10px; }
-#result { margin-top: 15px; padding: 10px; border-radius: 8px; display: none; }
+    .btn-container { display: flex; justify-content: space-between; gap: 10px; }
+    #result { margin-top: 15px; padding: 10px; border-radius: 8px; display: none; }
 
-#process-container { margin: 20px auto; max-width: 450px; background: #1c1c2b; border-radius: 10px; padding: 15px; display: none; transition: background 0.3s; }
-body.light-mode #process-container { background: #f1f1f1; }
-#share-summary { margin-top: 10px; font-weight: bold; color: #ff4ecd; }
-body.light-mode #share-summary { color: #e91e63; }
-.current-online { margin: 5px 0; background: #2a2a3d; padding: 8px; border-radius: 8px; font-size: 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; transition: background 0.3s, color 0.3s; }
-body.light-mode .current-online { background: #eee; color: #222; }
-.status-row { display: flex; align-items: center; gap: 6px; }
-.status-icon { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
-.progress-container { width: 100%; background: #333; border-radius: 8px; overflow: hidden; height: 10px; margin-top: 4px; transition: background 0.3s; }
-body.light-mode .progress-container { background: #ddd; }
-.progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #32ff7e, #ff4ecd); transition: width 0.3s ease-in-out; }
+    #process-container {
+      margin: 20px auto;
+      max-width: 450px;
+      background: #1c1c2b;
+      border-radius: 10px;
+      padding: 15px;
+      display: none;
+      transition: background 0.3s;
+    }
+    body.light-mode #process-container { background: #f1f1f1; }
+    #share-summary { margin-top: 10px; font-weight: bold; color: #ff4ecd; }
+    body.light-mode #share-summary { color: #e91e63; }
+    .current-online { margin: 5px 0; background: #2a2a3d; padding: 8px; border-radius: 8px; font-size: 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; transition: background 0.3s, color 0.3s; }
+    body.light-mode .current-online { background: #eee; color: #222; }
+    .status-row { display: flex; align-items: center; gap: 6px; }
+    .status-icon { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
+    .progress-container { width: 100%; background: #333; border-radius: 8px; overflow: hidden; height: 10px; margin-top: 4px; transition: background 0.3s; }
+    body.light-mode .progress-container { background: #ddd; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #32ff7e, #ff4ecd); transition: width 0.3s ease-in-out; }
 
-#mode-toggle { position: fixed; top: 10px; right: 10px; background: #ff4ecd; color: #fff; border: none; padding: 5px; border-radius: 50%; cursor: pointer; font-size: 14px; z-index: 999; transition: 0.3s; }
-#mode-toggle:hover { background: #e03bb3; }
-body.light-mode #mode-toggle { background: #e91e63; }
-body.light-mode #mode-toggle:hover { background: #d81b60; }
+    #mode-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #ff4ecd;
+      color: #fff;
+      border: none;
+      padding: 5px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 999;
+      transition: 0.3s;
+    }
+    #mode-toggle:hover { background: #e03bb3; }
+    body.light-mode #mode-toggle { background: #e91e63; }
+    body.light-mode #mode-toggle:hover { background: #d81b60; }
 
-#auth-container input { width: calc(100% - 20px); padding: 8px; margin-bottom: 8px; }
-#auth-container button { width: calc(50% - 5px); padding: 8px; margin-bottom: 8px; font-size: 14px; }
-#auth-container { display: flex; flex-direction: column; gap: 8px; align-items: center; }
-#auth-container .auth-btns { display: flex; gap: 10px; width: 100%; justify-content: center; }
+    #auth-container input { width: calc(100% - 20px); padding: 8px; margin-bottom: 8px; }
+    #auth-container button { width: calc(50% - 5px); padding: 8px; margin-bottom: 8px; font-size: 14px; }
+    #auth-container { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+    #auth-container .auth-btns { display: flex; gap: 10px; width: 100%; justify-content: center; }
 
-#user-count { max-width: 400px; margin: 10px auto; text-align: left; background: #1a1a27; padding: 10px; border-radius: 8px; color: #32ff7e; font-size: 14px; transition: background 0.3s, color 0.3s; }
-body.light-mode #user-count { background: #eee; color: #222; }
-
-#converter textarea { height: 100px; }
-#converter pre { background: #111; color: #0f0; padding: 10px; border-radius: 8px; min-height: 80px; white-space: pre-wrap; word-wrap: break-word; }
-</style>
+    #user-count {
+      max-width: 400px;
+      margin: 10px auto;
+      text-align: left;
+      background: #1a1a27;
+      padding: 10px;
+      border-radius: 8px;
+      color: #32ff7e;
+      font-size: 14px;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.light-mode #user-count { background: #eee; color: #222; }
+  </style>
 </head>
 <body>
 
-<button id="mode-toggle"><i class="fa-solid fa-moon"></i></button>
+  <button id="mode-toggle"><i class="fa-solid fa-moon"></i></button>
 
-<h1><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
-<div class="tagline" id="tagline"></div>
+  <h1><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
+  <div class="tagline" id="tagline"></div>
 
-<div id="auth-container">
-<input type="text" id="auth-username" placeholder="Username" required>
-<input type="password" id="auth-password" placeholder="Password" required>
-<div class="auth-btns">
-<button onclick="login()">Login</button>
-<button onclick="signup()">Create Account</button>
-</div>
-</div>
+  <div id="auth-container">
+    <input type="text" id="auth-username" placeholder="Username" required>
+    <input type="password" id="auth-password" placeholder="Password" required>
+    <div class="auth-btns">
+      <button onclick="login()">Login</button>
+      <button onclick="signup()">Create Account</button>
+    </div>
+  </div>
 
-<form id="main-form" onsubmit="submitForm(event)" style="display:none;">
-<label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState:</label>
-<input type="text" id="cookies" placeholder="Enter AppState" required>
-<label class="label-icon"><i class="fa-solid fa-link"></i> Link:</label>
-<input type="text" id="urls" placeholder="Enter Link" required>
-<label class="label-icon"><i class="fa-solid fa-hashtag"></i> Limit:</label>
-<input type="number" id="amounts" placeholder="Enter Limit" required>
-<label class="label-icon"><i class="fa-solid fa-clock"></i> Interval (ms):</label>
-<input type="number" id="intervals" placeholder="Enter Interval" required>
-<div class="btn-container">
-<button type="submit" id="submit-button"><i class="fa-solid fa-play"></i> Start</button>
-<button type="button" id="stop-button"><i class="fa-solid fa-stop"></i> Stop</button>
-</div>
-<div id="result"></div>
-</form>
+  <form id="main-form" onsubmit="submitForm(event)" style="display:none;">
+    <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState:</label>
+    <input type="text" id="cookies" placeholder="Enter AppState" required>
 
-<div id="converter" style="display:none;">
-<h2>Cookie to AppState Converter</h2>
-<textarea id="cookieInput" placeholder="Paste your cookie here..."></textarea>
-<div class="status" id="status">No input yet</div>
-<div class="btn-container">
-<button onclick="convert()">Convert</button>
-<button onclick="copyOutput()">Copy</button>
-<button onclick="downloadJSON()">Download JSON</button>
-</div>
-<pre id="output">No data yet</pre>
-</div>
+    <label class="label-icon"><i class="fa-solid fa-link"></i> Link:</label>
+    <input type="text" id="urls" placeholder="Enter Link" required>
 
-<div id="process-container">
-<h3><i class="fa-solid fa-chart-line"></i> Processing</h3>
-<div id="processing"></div>
-<div id="share-summary"></div>
-</div>
+    <label class="label-icon"><i class="fa-solid fa-hashtag"></i> Limit:</label>
+    <input type="number" id="amounts" placeholder="Enter Limit" required>
 
-<div id="user-count"><strong>Users:</strong> <span id="users-num">0</span></div>
+    <label class="label-icon"><i class="fa-solid fa-clock"></i> Interval (ms):</label>
+    <input type="number" id="intervals" placeholder="Enter Interval" required>
 
-<script>
-// Dark/light mode
-const toggleBtn = document.getElementById('mode-toggle');
-toggleBtn.addEventListener('click', () => {
-  document.body.classList.toggle('light-mode');
-  toggleBtn.innerHTML = document.body.classList.contains('light-mode') ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
-});
+    <div class="btn-container">
+      <button type="submit" id="submit-button"><i class="fa-solid fa-play"></i> Start</button>
+      <button type="button" id="stop-button"><i class="fa-solid fa-stop"></i> Stop</button>
+    </div>
+    <div id="result"></div>
+  </form>
 
-// Typing animation
-const text = "Automated tool that boosts your Facebook shares using AppState.";
-let i = 0;
-function typeWriter() {
-  if (i < text.length) {
-    document.getElementById("tagline").innerHTML += text.charAt(i);
-    i++;
-    setTimeout(typeWriter, 50);
-  }
-}
-typeWriter();
+  <div id="process-container">
+    <h3><i class="fa-solid fa-chart-line"></i> Processing</h3>
+    <div id="processing"></div>
+    <div id="share-summary"></div>
+  </div>
 
-// Auth & Users
-const authContainer = document.getElementById('auth-container');
-const mainForm = document.getElementById('main-form');
-const converter = document.getElementById('converter');
-const usersNum = document.getElementById('users-num');
+  <div id="user-count"><strong>Users:</strong> <span id="users-num">0</span></div>
 
-function updateUserCount() {
-  let users = JSON.parse(localStorage.getItem('users') || '{}');
-  usersNum.textContent = Object.keys(users).length;
-}
+  <script>
+    const toggleBtn = document.getElementById('mode-toggle');
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      toggleBtn.innerHTML = document.body.classList.contains('light-mode') ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+    });
 
-function signup() {
-  const username = document.getElementById('auth-username').value.trim();
-  const password = document.getElementById('auth-password').value.trim();
-  if(!username || !password){ alert('Enter username & password'); return; }
-  let users = JSON.parse(localStorage.getItem('users') || '{}');
-  if(users[username]){ alert('Username exists'); return; }
-  users[username] = password;
-  localStorage.setItem('users', JSON.stringify(users));
-  alert('Account created! Please login.');
-  updateUserCount();
-}
+    const text = "Automated tool that boosts your Facebook shares using AppState.";
+    let i = 0;
+    function typeWriter() {
+      if (i < text.length) {
+        document.getElementById("tagline").innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typeWriter, 50);
+      }
+    }
+    typeWriter();
 
-function login() {
-  const username = document.getElementById('auth-username').value.trim();
-  const password = document.getElementById('auth-password').value.trim();
-  if(!username || !password){ alert('Enter username & password'); return; }
-  let users = JSON.parse(localStorage.getItem('users') || '{}');
-  if(users[username] && users[username] === password){
-    alert('Login successful!');
-    authContainer.style.display = 'none';
-    mainForm.style.display = 'block';
-    converter.style.display = 'block';
+    const authContainer = document.getElementById('auth-container');
+    const mainForm = document.getElementById('main-form');
+    const usersNum = document.getElementById('users-num');
+
+    function updateUserCount() {
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      usersNum.textContent = Object.keys(users).length;
+    }
+
+    function signup() {
+      const username = document.getElementById('auth-username').value.trim();
+      const password = document.getElementById('auth-password').value.trim();
+      if(!username || !password){ alert('Enter username & password'); return; }
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      if(users[username]){ alert('Username exists'); return; }
+      users[username] = password;
+      localStorage.setItem('users', JSON.stringify(users));
+      alert('Account created! Please login.');
+      updateUserCount();
+    }
+
+    function login() {
+      const username = document.getElementById('auth-username').value.trim();
+      const password = document.getElementById('auth-password').value.trim();
+      if(!username || !password){ alert('Enter username & password'); return; }
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      if(users[username] && users[username] === password){
+        alert('Login successful!');
+        authContainer.style.display = 'none';
+        mainForm.style.display = 'block';
+        updateUserCount();
+      } else{
+        alert('Invalid credentials');
+      }
+    }
+
     updateUserCount();
-  } else{
-    alert('Invalid credentials');
-  }
-}
-updateUserCount();
 
-// Cookie to AppState converter
-const cookieInput=document.getElementById("cookieInput"); 
-const statusDiv=document.getElementById("status"); 
-let lastAppState=null;
+    // ShareBoost existing code
+    let refreshInterval;
+    let currentId = null;
 
-cookieInput.addEventListener("input",()=>{
-  const val=cookieInput.value.trim();
-  if(!val){cookieInput.className=""; statusDiv.textContent="No input yet"; statusDiv.className="status"; return;}
-  if(/^\s*([^=;]+=[^=;]+)(;\s*[^=;]+=[^=;]+)*\s*$/.test(val)){
-    cookieInput.className="valid"; 
-    statusDiv.textContent="Valid cookie format"; 
-    statusDiv.className="status valid";
-  } else{
-    cookieInput.className="invalid"; 
-    statusDiv.textContent="Invalid cookie format"; 
-    statusDiv.className="status invalid";
-  }
-});
+    async function submitForm(event){
+      event.preventDefault();
+      const result = document.getElementById("result");
+      const button = document.getElementById("submit-button");
+      try{
+        result.style.display="block";
+        button.disabled=true;
+        result.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+        const response = await fetch("/api/submit", {
+          method:"POST",
+          body:JSON.stringify({
+            cookie: document.getElementById("cookies").value,
+            url: document.getElementById("urls").value,
+            amount: document.getElementById("amounts").value,
+            interval: document.getElementById("intervals").value,
+          }),
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await response.json();
+        if(data.status===200){ currentId=data.id; result.style.backgroundColor="#1e4620"; result.style.color="#32ff7e"; result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; }
+        else{ result.style.backgroundColor="#3D1619"; result.style.color="#FE6265"; result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Error: '+data.error; }
+        button.disabled=false;
+      }catch(e){ console.error(e); }
+    }
 
-function convert(){
-  const cookieStr=cookieInput.value.trim();
-  if(!cookieStr.includes("=")){document.getElementById("output").textContent="Invalid cookie format!"; lastAppState=null; return;}
-  const cookies=cookieStr.split(";").map(c=>c.trim()).filter(Boolean);
-  lastAppState=cookies.map(c=>{
-    const parts=c.split("=");
-    return { key:parts[0], value:parts.slice(1).join("="), domain:".facebook.com", path:"/", hostOnly:false, creation:Date.now(), lastAccessed:Date.now() };
-  });
-  document.getElementById("output").textContent=JSON.stringify(lastAppState,null,2);
-  document.getElementById("cookies").value=JSON.stringify(lastAppState); // auto-fill AppState
-}
+    async function linkOfProcessing(){
+      const container=document.getElementById("processing");
+      const summary=document.getElementById("share-summary");
+      const processContainer=document.getElementById("process-container");
+      const refresh = async ()=>{
+        try{
+          const res = await fetch("/total");
+          if(!res.ok) return;
+          const data = await res.json();
+          container.innerHTML="";
+          let totalCount=0, totalTarget=0;
+          if(data.length===0){ processContainer.style.display="none"; summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; return; }
+          processContainer.style.display="block";
+          data.forEach((link,index)=>{
+            let {count,id,target,status}=link;
+            totalCount+=count; totalTarget+=parseInt(target);
+            const processCard=document.createElement("div");
+            processCard.classList.add("current-online");
+            let color="#ffc107"; if(status==="success") color="#32ff7e"; if(status==="failed") color="#ff4e4e";
+            processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target}</div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
+            container.appendChild(processCard);
+          });
+          summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
+        }catch(err){ console.error(err); }
+      };
+      refreshInterval=setInterval(refresh,1000); refresh();
+    }
+    linkOfProcessing();
 
-function copyOutput(){ navigator.clipboard.writeText(document.getElementById("output").textContent).then(()=>alert("Copied to clipboard!")); }
-function downloadJSON(){ if(!lastAppState){alert("No valid AppState to download!"); return;} const blob=new Blob([JSON.stringify(lastAppState,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="appstate.json"; a.click(); URL.revokeObjectURL(url); }
-
-// ShareBoost logic
-let refreshInterval; let currentId = null;
-
-async function submitForm(event){
-  event.preventDefault();
-  const result = document.getElementById("result");
-  const button = document.getElementById("submit-button");
-  try{
-    result.style.display="block";
-    button.disabled=true;
-    result.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-    // Placeholder fetch, replace with real API
-    setTimeout(()=>{
-      result.style.backgroundColor="#1e4620"; result.style.color="#32ff7e";
-      result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!';
-      button.disabled=false;
-      currentId=Date.now();
-      document.getElementById("process-container").style.display="block";
-    },1000);
-  }catch(e){ console.error(e); }
-}
-</script>
-
+    document.getElementById("stop-button").addEventListener("click", async ()=>{
+      if(!currentId){ alert("⚠️ No active session to stop!"); return; }
+      try{
+        const res=await fetch("/api/stop",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id:currentId})});
+        const data=await res.json();
+        if(data.status===200){ if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; } document.getElementById("processing").innerHTML='<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.'; document.getElementById("share-summary").innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; currentId=null; }
+        else{ alert("Error: "+(data.error||"Unknown")); }
+      }catch(err){ console.error("Stop request failed",err); }
+    });
+  </script>
 </body>
 </html>
