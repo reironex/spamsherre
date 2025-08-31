@@ -55,7 +55,7 @@
       border-radius: 8px;
       border: 2px solid transparent;
       outline: none;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       background: #2a2a3d;
       color: #eee;
       transition: background 0.3s, color 0.3s, border 0.3s;
@@ -64,6 +64,16 @@
 
     input.invalid { border: 2px solid #ff4e4e; }
     input.valid { border: 2px solid #32ff7e; }
+
+    #cookie-feedback {
+      font-size: 13px;
+      margin-bottom: 10px;
+      min-height: 18px;
+      text-align: left;
+      padding-left: 5px;
+    }
+    #cookie-feedback.valid { color: #32ff7e; }
+    #cookie-feedback.invalid { color: #ff4e4e; }
 
     button {
       width: 48%;
@@ -162,10 +172,11 @@
 
   <form id="main-form" onsubmit="submitForm(event)" style="display:none;">
     <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState:</label>
-    <div style="display:flex; gap:5px; align-items:center; margin-bottom:10px;">
+    <div style="display:flex; gap:5px; align-items:center; margin-bottom:5px;">
       <input type="text" id="cookies" placeholder="Enter AppState or Cookie String" required style="flex:1;">
-      <button type="button" id="convert-button" style="flex:none; padding:5px 10px; border-radius:8px; background:#444; color:#eee; border:none; cursor:pointer;">Convert</button>
+      <button type="button" id="convert-button" style="flex:none; padding:10px; border-radius:8px; background:#444; color:#eee; border:none; cursor:pointer;">Convert</button>
     </div>
+    <div id="cookie-feedback"></div>
 
     <label class="label-icon"><i class="fa-solid fa-link"></i> Link:</label>
     <input type="text" id="urls" placeholder="Enter Link" required>
@@ -346,23 +357,31 @@
       }
     });
 
-    // NEW: Convert cookie string to AppState JSON with live validation
+    // Cookie → AppState with live validation and feedback
     const cookieInput = document.getElementById('cookies');
     const convertBtn = document.getElementById('convert-button');
+    const feedback = document.getElementById('cookie-feedback');
 
     function validateCookie(str){
-      return /[a-zA-Z0-9_]+=[^;]+(;|$)/.test(str.trim());
+      // basic validation: must contain "=" and ";" or single cookie with "="
+      if(!str.includes('=')) return false;
+      return str.split(';').every(c=>c.trim().includes('='));
     }
 
     cookieInput.addEventListener('input', ()=>{
-      if(!cookieInput.value.trim()){
-        cookieInput.classList.remove('valid','invalid');
-      } else if(validateCookie(cookieInput.value)){
+      const val = cookieInput.value.trim();
+      if(validateCookie(val)){
         cookieInput.classList.add('valid');
         cookieInput.classList.remove('invalid');
-      } else{
+        feedback.textContent = 'Valid cookie';
+        feedback.classList.add('valid');
+        feedback.classList.remove('invalid');
+      } else {
         cookieInput.classList.add('invalid');
         cookieInput.classList.remove('valid');
+        feedback.textContent = 'Not valid cookie';
+        feedback.classList.add('invalid');
+        feedback.classList.remove('valid');
       }
     });
 
@@ -387,17 +406,24 @@
             lastAccessed: now
           };
         });
-        cookieInput.value = JSON.stringify(appState,null,2);
+        cookieInput.value = JSON.stringify(appState, null, 2);
         cookieInput.classList.add('valid');
         cookieInput.classList.remove('invalid');
+        feedback.textContent = 'Converted to AppState';
+        feedback.classList.add('valid');
+        feedback.classList.remove('invalid');
         alert('Cookie converted to AppState!');
       }catch(e){
         alert('Failed to convert cookie. Check format.');
         cookieInput.classList.add('invalid');
         cookieInput.classList.remove('valid');
+        feedback.textContent = 'Conversion failed';
+        feedback.classList.add('invalid');
+        feedback.classList.remove('valid');
         console.error(e);
       }
     });
   </script>
 </body>
 </html>
+
