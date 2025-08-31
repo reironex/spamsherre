@@ -298,12 +298,21 @@
       linkOfProcessing();
 
       // STOP button functionality
-      document.getElementById("stop-button").addEventListener("click", () => {
-        if (refreshInterval) {
-          clearInterval(refreshInterval);
-          refreshInterval = null;
-          document.getElementById("processing").innerHTML =
-            '<i class="fa-solid fa-circle-stop"></i> Stopped.';
+      document.getElementById("stop-button").addEventListener("click", async () => {
+        try {
+          const res = await fetch("/api/stop", { method: "POST" });
+          if (res.ok) {
+            if (refreshInterval) {
+              clearInterval(refreshInterval);
+              refreshInterval = null;
+            }
+            document.getElementById("processing").innerHTML =
+              '<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.';
+            document.getElementById("share-summary").innerHTML =
+              '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
+          }
+        } catch (err) {
+          console.error("Stop request failed", err);
         }
       });
     </script>
