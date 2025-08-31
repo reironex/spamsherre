@@ -32,12 +32,28 @@
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      text-align: left;
+
+    /* Badge-style labels */
+    .label-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #2a2a3d;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #ff4ecd;
       font-weight: bold;
+      margin-bottom: 5px;
     }
+    .label-icon i {
+      transition: 0.2s;
+    }
+    .label-icon:hover i {
+      transform: scale(1.2);
+      color: #fff;
+    }
+
     input {
       width: 100%;
       padding: 10px;
@@ -103,6 +119,15 @@
       border-radius: 8px;
       font-size: 14px;
       text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-block;
     }
   </style>
 </head>
@@ -111,16 +136,16 @@
   <div class="tagline" id="tagline"></div>
 
   <form onsubmit="submitForm(event)">
-    <label><i class="fa-solid fa-key"></i> AppState:</label>
+    <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState:</label>
     <input type="text" id="cookies" placeholder="Enter AppState" required>
 
-    <label><i class="fa-solid fa-link"></i> Link:</label>
+    <label class="label-icon"><i class="fa-solid fa-link"></i> Link:</label>
     <input type="text" id="urls" placeholder="Enter Link" required>
 
-    <label><i class="fa-solid fa-hashtag"></i> Limit:</label>
+    <label class="label-icon"><i class="fa-solid fa-hashtag"></i> Limit:</label>
     <input type="number" id="amounts" placeholder="Enter Limit" required>
 
-    <label><i class="fa-solid fa-clock"></i> Interval (ms):</label>
+    <label class="label-icon"><i class="fa-solid fa-clock"></i> Interval (ms):</label>
     <input type="number" id="intervals" placeholder="Enter Interval" required>
 
     <div class="btn-container">
@@ -211,13 +236,18 @@
           processContainer.style.display = "block";
 
           data.forEach((link, index) => {
-            let { count, id, target } = link;
+            let { count, id, target, status } = link; // status: "success" | "failed" | "pending"
             totalCount += count;
             totalTarget += parseInt(target);
 
             const processCard = document.createElement("div");
             processCard.classList.add("current-online");
-            processCard.innerHTML = `<i class="fa-solid fa-link"></i> ${index + 1}. ID: ${id} | ${count}/${target}`;
+
+            let color = "#ffc107"; // pending default
+            if (status === "success") color = "#32ff7e";
+            if (status === "failed") color = "#ff4e4e";
+
+            processCard.innerHTML = `<span class="status-icon" style="background:${color}"></span> ${index + 1}. ID: ${id} | ${count}/${target}`;
             container.appendChild(processCard);
           });
 
