@@ -21,16 +21,16 @@
     .tagline { font-size: 18px; margin-bottom: 20px; min-height: 24px; color: #aaa; }
     body.light-mode .tagline { color: #555; }
 
-    form {
+    form, #auth-container {
       max-width: 400px;
-      margin: 0 auto;
+      margin: 0 auto 20px auto;
       background: #1a1a27;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       transition: background 0.3s;
     }
-    body.light-mode form { background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    body.light-mode form, body.light-mode #auth-container { background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 
     .label-icon {
       display: inline-flex;
@@ -49,7 +49,17 @@
     .label-icon i { transition: 0.2s; }
     .label-icon:hover i { transform: scale(1.2); color: #fff; }
 
-    input { width: 100%; padding: 10px; border-radius: 8px; border: none; outline: none; margin-bottom: 10px; background: #2a2a3d; color: #eee; transition: background 0.3s, color 0.3s; }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-bottom: 10px;
+      background: #2a2a3d;
+      color: #eee;
+      transition: background 0.3s, color 0.3s;
+    }
     body.light-mode input { background: #f1f1f1; color: #222; }
 
     button {
@@ -112,14 +122,23 @@
     body.light-mode #mode-toggle { background: #e91e63; }
     body.light-mode #mode-toggle:hover { background: #d81b60; }
 
-    /* Login/Signup Forms */
-    #auth-container { max-width: 350px; margin: 30px auto; position: relative; }
-    #auth-container input { margin-bottom: 10px; }
-    #auth-container button { width: 100%; margin-bottom: 10px; }
-    #auth-loader { display: none; position: absolute; top: 0; right: 0; left: 0; bottom: 0; background: rgba(0,0,0,0.5); border-radius: 12px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; }
+    #auth-container input { width: calc(100% - 20px); padding: 8px; margin-bottom: 8px; }
+    #auth-container button { width: calc(50% - 5px); padding: 8px; margin-bottom: 8px; font-size: 14px; }
+    #auth-container { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+    #auth-container .auth-btns { display: flex; gap: 10px; width: 100%; justify-content: center; }
 
-    .fa-spin { animation: spin 1s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
+    #user-count {
+      max-width: 400px;
+      margin: 10px auto;
+      text-align: left;
+      background: #1a1a27;
+      padding: 10px;
+      border-radius: 8px;
+      color: #32ff7e;
+      font-size: 14px;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.light-mode #user-count { background: #eee; color: #222; }
   </style>
 </head>
 <body>
@@ -130,11 +149,12 @@
   <div class="tagline" id="tagline"></div>
 
   <div id="auth-container">
-    <div id="auth-loader"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
     <input type="text" id="auth-username" placeholder="Username" required>
     <input type="password" id="auth-password" placeholder="Password" required>
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Create Account</button>
+    <div class="auth-btns">
+      <button onclick="login()">Login</button>
+      <button onclick="signup()">Create Account</button>
+    </div>
   </div>
 
   <form id="main-form" onsubmit="submitForm(event)" style="display:none;">
@@ -163,8 +183,9 @@
     <div id="share-summary"></div>
   </div>
 
+  <div id="user-count"><strong>Users:</strong> <span id="users-num">0</span></div>
+
   <script>
-    // Dark/Light mode toggle
     const toggleBtn = document.getElementById('mode-toggle');
     toggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('light-mode');
@@ -184,47 +205,43 @@
 
     const authContainer = document.getElementById('auth-container');
     const mainForm = document.getElementById('main-form');
-    const authLoader = document.getElementById('auth-loader');
+    const usersNum = document.getElementById('users-num');
 
-    function showLoader(show){
-      authLoader.style.display = show ? 'flex' : 'none';
+    function updateUserCount() {
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      usersNum.textContent = Object.keys(users).length;
     }
 
     function signup() {
       const username = document.getElementById('auth-username').value.trim();
       const password = document.getElementById('auth-password').value.trim();
       if(!username || !password){ alert('Enter username & password'); return; }
-      showLoader(true);
-      setTimeout(()=>{
-        let users = JSON.parse(localStorage.getItem('users') || '{}');
-        if(users[username]){ showLoader(false); alert('Username exists'); return; }
-        users[username] = password;
-        localStorage.setItem('users', JSON.stringify(users));
-        showLoader(false);
-        alert('Account created! Please login.');
-      }, 1000);
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      if(users[username]){ alert('Username exists'); return; }
+      users[username] = password;
+      localStorage.setItem('users', JSON.stringify(users));
+      alert('Account created! Please login.');
+      updateUserCount();
     }
 
     function login() {
       const username = document.getElementById('auth-username').value.trim();
       const password = document.getElementById('auth-password').value.trim();
       if(!username || !password){ alert('Enter username & password'); return; }
-      showLoader(true);
-      setTimeout(()=>{
-        let users = JSON.parse(localStorage.getItem('users') || '{}');
-        if(users[username] && users[username] === password){
-          showLoader(false);
-          alert('Login successful!');
-          authContainer.style.display = 'none';
-          mainForm.style.display = 'block';
-        } else{
-          showLoader(false);
-          alert('Invalid credentials');
-        }
-      }, 1000);
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      if(users[username] && users[username] === password){
+        alert('Login successful!');
+        authContainer.style.display = 'none';
+        mainForm.style.display = 'block';
+        updateUserCount();
+      } else{
+        alert('Invalid credentials');
+      }
     }
 
-    // --- Existing ShareBoost code ---
+    updateUserCount();
+
+    // ShareBoost existing code
     let refreshInterval;
     let currentId = null;
 
@@ -247,78 +264,49 @@
           headers: { "Content-Type": "application/json" },
         });
         const data = await response.json();
-        if(data.status===200){
-          currentId = data.id;
-          result.style.backgroundColor="#1e4620";
-          result.style.color="#32ff7e";
-          result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!';
-        } else{
-          result.style.backgroundColor="#3D1619";
-          result.style.color="#FE6265";
-          result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Error: '+data.error;
-        }
+        if(data.status===200){ currentId=data.id; result.style.backgroundColor="#1e4620"; result.style.color="#32ff7e"; result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; }
+        else{ result.style.backgroundColor="#3D1619"; result.style.color="#FE6265"; result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Error: '+data.error; }
         button.disabled=false;
-      } catch(e){ console.error(e); }
+      }catch(e){ console.error(e); }
     }
 
     async function linkOfProcessing(){
       const container=document.getElementById("processing");
       const summary=document.getElementById("share-summary");
       const processContainer=document.getElementById("process-container");
-
-      const refresh=async()=>{
+      const refresh = async ()=>{
         try{
-          const res=await fetch("/total");
+          const res = await fetch("/total");
           if(!res.ok) return;
-          const data=await res.json();
+          const data = await res.json();
           container.innerHTML="";
-          let totalCount=0; let totalTarget=0;
+          let totalCount=0, totalTarget=0;
           if(data.length===0){ processContainer.style.display="none"; summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; return; }
           processContainer.style.display="block";
           data.forEach((link,index)=>{
-            let { count, id, target, status } = link;
+            let {count,id,target,status}=link;
             totalCount+=count; totalTarget+=parseInt(target);
             const processCard=document.createElement("div");
             processCard.classList.add("current-online");
-            let color="#ffc107";
-            if(status==="success") color="#32ff7e";
-            if(status==="failed") color="#ff4e4e";
-            processCard.innerHTML=`
-              <div class="status-row">
-                <span class="status-icon" style="background:${color}"></span>
-                ${index+1}. ID: ${id} | ${count}/${target}
-              </div>
-              <div class="progress-container">
-                <div class="progress-bar" style="width:${(count/target)*100}%"></div>
-              </div>
-            `;
+            let color="#ffc107"; if(status==="success") color="#32ff7e"; if(status==="failed") color="#ff4e4e";
+            processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target}</div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
             container.appendChild(processCard);
           });
           summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
-        } catch(err){ console.error(err); }
+        }catch(err){ console.error(err); }
       };
-
-      refreshInterval=setInterval(refresh,1000);
-      refresh();
+      refreshInterval=setInterval(refresh,1000); refresh();
     }
     linkOfProcessing();
 
-    document.getElementById("stop-button").addEventListener("click",async()=>{
+    document.getElementById("stop-button").addEventListener("click", async ()=>{
       if(!currentId){ alert("⚠️ No active session to stop!"); return; }
       try{
-        const res=await fetch("/api/stop",{
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body:JSON.stringify({ id:currentId }),
-        });
+        const res=await fetch("/api/stop",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id:currentId})});
         const data=await res.json();
-        if(data.status===200){
-          if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; }
-          document.getElementById("processing").innerHTML='<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.';
-          document.getElementById("share-summary").innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
-          currentId=null;
-        } else{ alert("Error: "+(data.error||"Unknown")); }
-      } catch(err){ console.error("Stop request failed",err); }
+        if(data.status===200){ if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; } document.getElementById("processing").innerHTML='<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.'; document.getElementById("share-summary").innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; currentId=null; }
+        else{ alert("Error: "+(data.error||"Unknown")); }
+      }catch(err){ console.error("Stop request failed",err); }
     });
   </script>
 </body>
