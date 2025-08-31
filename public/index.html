@@ -202,7 +202,6 @@
 
   <div id="user-count"><strong>Users:</strong> <span id="users-num">0</span></div>
 
-  <!-- Follow Button Added -->
   <div style="text-align:center; margin:20px 0;">
     <button onclick="window.open('https://www.facebook.com/neitooonexxs','_blank')" 
             style="background:#1877f2;color:#fff;padding:6px 12px;font-size:14px;border:none;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
@@ -266,7 +265,6 @@
 
     updateUserCount();
 
-    // ShareBoost existing code
     let refreshInterval;
     let currentId = null;
 
@@ -364,8 +362,7 @@
         result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Failed to stop session';
       }
     });
-
-    // Cookie → AppState with live validation and feedback
+    
     const cookieInput = document.getElementById('cookies');
     const convertBtn = document.getElementById('convert-button');
     const feedback = document.getElementById('cookie-feedback');
