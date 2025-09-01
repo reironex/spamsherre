@@ -6,6 +6,7 @@
   <title>ShareBoost – Facebook Share Tool</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
+    /* === Keep all your previous styles === */
     body {
       font-family: Arial, sans-serif;
       background: #0f0f17;
@@ -133,8 +134,8 @@
     body.light-mode #process-container { background: #f1f1f1; }
     #share-summary { margin-top: 10px; font-weight: bold; color: #ff4ecd; }
     body.light-mode #share-summary { color: #e91e63; }
-    .current-online { margin:5px 0; background:#2a2a3d; padding:8px; border-radius:8px; font-size:14px; text-align:left; display:flex; flex-direction:column; gap:4px; transition: background 0.3s, color 0.3s; }
-    body.light-mode .current-online { background:#eee; color:#222; }
+    .current-online { margin: 5px 0; background: #2a2a3d; padding: 8px; border-radius: 8px; font-size: 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; transition: background 0.3s, color 0.3s; }
+    body.light-mode .current-online { background: #eee; color: #222; }
     .status-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
     .status-icon { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
     .progress-container { width: 100%; background: #333; border-radius: 8px; overflow: hidden; height: 10px; margin-top: 4px; transition: background 0.3s; }
@@ -147,7 +148,12 @@
       right: 10px;
       z-index: 999;
     }
-    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider {
       position: absolute;
@@ -332,8 +338,8 @@
   updateUserCount();
 
   let refreshInterval;
+  let currentId = null;
   let liveTimers = [];
-  let activeSessions = [];
 
   async function submitForm(event){
     event.preventDefault();
@@ -355,12 +361,10 @@
       });
       const data = await response.json();
       if(data.status===200){ 
-        const id = data.id;
-        activeSessions.push({id, count:0, target:parseInt(document.getElementById("amounts").value), status:"pending", startTime: Date.now()});
+        currentId=data.id; 
         result.style.backgroundColor="#1e4620"; 
         result.style.color="#32ff7e"; 
-        result.innerHTML='<i class="fa-solid fa-circle-check"></i> Session started successfully!'; 
-        updateProcessingDisplay();
+        result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; 
       }
       else{ 
         result.style.backgroundColor="#3D1619"; 
@@ -382,43 +386,56 @@
     return `${hours}h ago`;
   }
 
-  function updateProcessingDisplay(){
-    const container = document.getElementById("processing");
-    const summary = document.getElementById("share-summary");
-    if(activeSessions.length===0){
-      container.innerHTML='';
-      document.getElementById("process-container").style.display='none';
-      summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
-      return;
-    }
-    document.getElementById("process-container").style.display='block';
-    container.innerHTML='';
-    liveTimers = [];
-    let totalCount=0, totalTarget=0;
-    activeSessions.forEach((session,index)=>{
-      totalCount+=session.count; totalTarget+=session.target;
-      const color = session.status==="success"?"#32ff7e":(session.status==="failed"?"#ff4e4e":"#ffc107");
-      const card = document.createElement('div');
-      card.classList.add('current-online');
-      const timeSpan = document.createElement('span');
-      timeSpan.style.fontSize="12px";
-      timeSpan.style.color="#aaa";
-      timeSpan.textContent = formatTimeAgo(session.startTime);
-      liveTimers.push({span:timeSpan, startTime:session.startTime});
-      card.innerHTML = `<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${session.id} | ${session.count}/${session.target} | Status: ${session.status}</div><div class="progress-container"><div class="progress-bar" style="width:${(session.count/session.target)*100}%"></div></div>`;
-      card.querySelector('.status-row').appendChild(timeSpan);
-      container.appendChild(card);
-    });
-    summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
-  }
+  async function linkOfProcessing(){
+    const container=document.getElementById("processing");
+    const summary=document.getElementById("share-summary");
+    const processContainer=document.getElementById("process-container");
+    
+    const refresh = async ()=>{
+      try{
+        const res = await fetch("/total");
+        if(!res.ok) return;
+        const data = await res.json();
+        container.innerHTML="";
+        liveTimers = [];
+        let totalCount=0, totalTarget=0;
+        if(data.length===0){ 
+          processContainer.style.display="none"; 
+          summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; 
+          return; 
+        }
+        processContainer.style.display="block";
+        data.forEach((link,index)=>{
+          let {count,id,target,status,startTime}=link;
+          totalCount+=count; totalTarget+=parseInt(target);
+          const processCard=document.createElement("div");
+          processCard.classList.add("current-online");
+          let color="#ffc107"; if(status==="success") color="#32ff7e"; if(status==="failed") color="#ff4e4e";
+          const timeSpan = document.createElement('span');
+          timeSpan.style.fontSize="12px"; timeSpan.style.color="#aaa";
+          processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target} </div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
+          processCard.querySelector('.status-row').appendChild(timeSpan);
+          container.appendChild(processCard);
 
-  setInterval(()=>{
-    liveTimers.forEach(obj => obj.span.textContent = formatTimeAgo(obj.startTime));
-  },1000);
+          if(startTime){
+            liveTimers.push({span: timeSpan, startTime});
+            timeSpan.textContent = formatTimeAgo(startTime);
+          } else timeSpan.textContent = 'Just now';
+        });
+        summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
+      }catch(err){ console.error(err); }
+    };
+    refreshInterval=setInterval(refresh,1000); 
+    refresh();
+    setInterval(()=>{
+      liveTimers.forEach(obj => obj.span.textContent = formatTimeAgo(obj.startTime));
+    },1000);
+  }
+  linkOfProcessing();
 
   document.getElementById("stop-button").addEventListener("click", async ()=>{
     const result = document.getElementById("result");
-    if(activeSessions.length===0){ 
+    if(!currentId){ 
       result.style.display = "block";
       result.style.backgroundColor = "#3D1619";
       result.style.color = "#FE6265";
@@ -426,24 +443,34 @@
       return; 
     }
     try{
-      const stopPromises = activeSessions.map(s => fetch("/api/stop",{ 
+      const res=await fetch("/api/stop",{ 
         method:"POST", 
         headers:{"Content-Type":"application/json"}, 
-        body:JSON.stringify({id:s.id})
-      }).then(r=>r.json()));
-      const responses = await Promise.all(stopPromises);
-      activeSessions = [];
-      updateProcessingDisplay();
-      result.style.display="block";
-      result.style.backgroundColor="#1e4620";
-      result.style.color="#32ff7e";
-      result.innerHTML='<i class="fa-solid fa-circle-check"></i> All sessions stopped successfully';
+        body:JSON.stringify({id:currentId})
+      });
+      const data=await res.json();
+      if(data.status===200){ 
+        if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; } 
+        document.getElementById("processing").innerHTML='<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.'; 
+        document.getElementById("share-summary").innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; 
+        result.style.display="block";
+        result.style.backgroundColor="#1e4620";
+        result.style.color="#32ff7e";
+        result.innerHTML='<i class="fa-solid fa-circle-check"></i> Session stopped successfully';
+        currentId=null; 
+      }
+      else{ 
+        result.style.display="block";
+        result.style.backgroundColor="#3D1619";
+        result.style.color="#FE6265";
+        result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: '+(data.error||"Unknown");
+      }
     }catch(err){ 
-      console.error(err);
+      console.error("Stop request failed",err); 
       result.style.display="block";
       result.style.backgroundColor="#3D1619";
       result.style.color="#FE6265";
-      result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Failed to stop sessions';
+      result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Failed to stop session';
     }
   });
 
