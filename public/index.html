@@ -135,7 +135,7 @@
     body.light-mode #share-summary { color: #e91e63; }
     .current-online { margin: 5px 0; background: #2a2a3d; padding: 8px; border-radius: 8px; font-size: 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; transition: background 0.3s, color 0.3s; }
     body.light-mode .current-online { background: #eee; color: #222; }
-    .status-row { display: flex; align-items: center; gap: 6px; }
+    .status-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
     .status-icon { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
     .progress-container { width: 100%; background: #333; border-radius: 8px; overflow: hidden; height: 10px; margin-top: 4px; transition: background 0.3s; }
     body.light-mode .progress-container { background: #ddd; }
@@ -286,7 +286,6 @@
       usersNum.textContent = Object.keys(users).length;
     }
 
-    // Check if user is already logged in
     window.addEventListener('load', () => {
       const loggedInUser = localStorage.getItem('currentUser');
       const rememberedUser = localStorage.getItem('rememberedUser');
@@ -319,7 +318,7 @@
       let users = JSON.parse(localStorage.getItem('users') || '{}');
       if(users[username] && users[username] === password){
         alert('Login successful!');
-        localStorage.setItem('currentUser', username); // store logged-in user
+        localStorage.setItem('currentUser', username);
         if(document.getElementById('remember-me').checked){
           localStorage.setItem('rememberedUser', username);
         } else {
@@ -372,6 +371,17 @@
       }catch(e){ console.error(e); }
     }
 
+    function formatTimeAgo(startTime){
+      const now = Date.now();
+      const diff = now - startTime;
+      const seconds = Math.floor(diff / 1000);
+      if(seconds < 60) return `${seconds}s ago`;
+      const minutes = Math.floor(seconds/60);
+      if(minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes/60);
+      return `${hours}h ago`;
+    }
+
     async function linkOfProcessing(){
       const container=document.getElementById("processing");
       const summary=document.getElementById("share-summary");
@@ -386,12 +396,13 @@
           if(data.length===0){ processContainer.style.display="none"; summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; return; }
           processContainer.style.display="block";
           data.forEach((link,index)=>{
-            let {count,id,target,status}=link;
+            let {count,id,target,status,startTime}=link;
             totalCount+=count; totalTarget+=parseInt(target);
             const processCard=document.createElement("div");
             processCard.classList.add("current-online");
             let color="#ffc107"; if(status==="success") color="#32ff7e"; if(status==="failed") color="#ff4e4e";
-            processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target}</div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
+            const timeDisplay = startTime ? formatTimeAgo(startTime) : 'Just now';
+            processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target} <span style="font-size:12px; color:#aaa;">(${timeDisplay})</span></div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
             container.appendChild(processCard);
           });
           summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
