@@ -192,9 +192,28 @@
       transition: background 0.3s, color 0.3s;
     }
     body.light-mode #user-count { background: #eee; color: #222; }
+
+    /* Security Disclaimer */
+    #security-disclaimer {
+      position: fixed;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff4e4e;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      transition: top 0.6s ease;
+      font-size: 14px;
+    }
+    #security-disclaimer.show { top: 10px; }
   </style>
 </head>
 <body>
+
+  <div id="security-disclaimer">⚠️ Warning: Use at your own risk. This tool accesses Facebook accounts. Do not share credentials.</div>
 
   <div id="mode-toggle-container">
     <label class="switch">
@@ -256,6 +275,13 @@
   </div>
 
   <script>
+    // Security Disclaimer animation
+    const disclaimer = document.getElementById('security-disclaimer');
+    window.addEventListener('load', () => {
+      disclaimer.classList.add('show');
+      setTimeout(()=>{ disclaimer.classList.remove('show'); }, 7000);
+    });
+
     // Theme toggle
     const toggleBtn = document.getElementById('mode-toggle');
     if(localStorage.getItem('theme') === 'light') {
@@ -370,7 +396,7 @@
           result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Error: '+data.error; 
         }
         button.disabled=false;
-      }catch(e){ console.error(e); }
+      }catch(e){ console.error(e); button.disabled=false; }
     }
 
     function formatTimeAgo(startTime){
@@ -413,19 +439,14 @@
             processCard.querySelector('.status-row').appendChild(timeSpan);
             container.appendChild(processCard);
 
-            // live timer
-            if(startTime){
-              liveTimers.push({span: timeSpan, startTime});
-              timeSpan.textContent = formatTimeAgo(startTime);
-            } else timeSpan.textContent = 'Just now';
+            if(startTime){ liveTimers.push({span: timeSpan, startTime}); timeSpan.textContent = formatTimeAgo(startTime); } 
+            else timeSpan.textContent = 'Just now';
           });
           summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
         }catch(err){ console.error(err); }
       };
       refreshInterval=setInterval(refresh,1000); refresh();
-      setInterval(()=>{
-        liveTimers.forEach(obj => obj.span.textContent = formatTimeAgo(obj.startTime));
-      },1000);
+      setInterval(()=>{ liveTimers.forEach(obj => obj.span.textContent = formatTimeAgo(obj.startTime)); },1000);
     }
     linkOfProcessing();
 
