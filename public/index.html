@@ -256,6 +256,7 @@
   </div>
 
   <script>
+    // Theme toggle
     const toggleBtn = document.getElementById('mode-toggle');
     if(localStorage.getItem('theme') === 'light') {
       document.body.classList.add('light-mode');
@@ -266,6 +267,7 @@
       localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
     });
 
+    // Typing tagline
     const text = "Automated tool that boosts your Facebook shares using AppState.";
     let i = 0;
     function typeWriter() {
@@ -382,16 +384,20 @@
       return `${hours}h ago`;
     }
 
+    let liveTimers = [];
+
     async function linkOfProcessing(){
       const container=document.getElementById("processing");
       const summary=document.getElementById("share-summary");
       const processContainer=document.getElementById("process-container");
+      
       const refresh = async ()=>{
         try{
           const res = await fetch("/total");
           if(!res.ok) return;
           const data = await res.json();
           container.innerHTML="";
+          liveTimers = [];
           let totalCount=0, totalTarget=0;
           if(data.length===0){ processContainer.style.display="none"; summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; return; }
           processContainer.style.display="block";
@@ -401,14 +407,25 @@
             const processCard=document.createElement("div");
             processCard.classList.add("current-online");
             let color="#ffc107"; if(status==="success") color="#32ff7e"; if(status==="failed") color="#ff4e4e";
-            const timeDisplay = startTime ? formatTimeAgo(startTime) : 'Just now';
-            processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target} <span style="font-size:12px; color:#aaa;">(${timeDisplay})</span></div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
+            const timeSpan = document.createElement('span');
+            timeSpan.style.fontSize="12px"; timeSpan.style.color="#aaa";
+            processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target} </div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
+            processCard.querySelector('.status-row').appendChild(timeSpan);
             container.appendChild(processCard);
+
+            // live timer
+            if(startTime){
+              liveTimers.push({span: timeSpan, startTime});
+              timeSpan.textContent = formatTimeAgo(startTime);
+            } else timeSpan.textContent = 'Just now';
           });
           summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
         }catch(err){ console.error(err); }
       };
       refreshInterval=setInterval(refresh,1000); refresh();
+      setInterval(()=>{
+        liveTimers.forEach(obj => obj.span.textContent = formatTimeAgo(obj.startTime));
+      },1000);
     }
     linkOfProcessing();
 
@@ -452,7 +469,8 @@
         result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Failed to stop session';
       }
     });
-    
+
+    // Cookie to AppState
     const cookieInput = document.getElementById('cookies');
     const convertBtn = document.getElementById('convert-button');
     const feedback = document.getElementById('cookie-feedback');
@@ -517,6 +535,7 @@
         console.error(e);
       }
     });
+
   </script>
 </body>
 </html>
