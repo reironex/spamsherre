@@ -336,8 +336,8 @@
 
     updateUserCount();
 
-    let liveTimers = [];
-    let activeSessions = {};
+    let refreshInterval;
+    let currentId = null;
 
     async function submitForm(event){
       event.preventDefault();
@@ -359,12 +359,10 @@
         });
         const data = await response.json();
         if(data.status===200){ 
-          const sessionId = data.id;
-          activeSessions[sessionId] = { startTime: Date.now(), count:0, target: parseInt(document.getElementById("amounts").value), status: 'running' };
+          currentId=data.id; 
           result.style.backgroundColor="#1e4620"; 
           result.style.color="#32ff7e"; 
           result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; 
-          updateProcessing();
         }
         else{ 
           result.style.backgroundColor="#3D1619"; 
@@ -386,67 +384,90 @@
       return `${hours}h ago`;
     }
 
-    function updateProcessing(){
-      const container = document.getElementById("processing");
-      const summary = document.getElementById("share-summary");
-      const processContainer = document.getElementById("process-container");
-      container.innerHTML = '';
-      liveTimers = [];
-      let totalCount = 0, totalTarget = 0;
-      const sessionIds = Object.keys(activeSessions);
-      if(sessionIds.length===0){ processContainer.style.display="none"; summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; return; }
-      processContainer.style.display = "block";
-      sessionIds.forEach((id,index)=>{
-        const s = activeSessions[id];
-        totalCount += s.count;
-        totalTarget += s.target;
-        const processCard=document.createElement("div");
-        processCard.classList.add("current-online");
-        let color="#ffc107"; 
-        if(s.status==="success") color="#32ff7e"; 
-        if(s.status==="failed") color="#ff4e4e";
-        const timeSpan = document.createElement('span');
-        timeSpan.style.fontSize="12px"; timeSpan.style.color="#aaa";
-        processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${s.count}/${s.target}</div><div class="progress-container"><div class="progress-bar" style="width:${(s.count/s.target)*100}%"></div></div>`;
-        processCard.querySelector('.status-row').appendChild(timeSpan);
-        container.appendChild(processCard);
-        liveTimers.push({span: timeSpan, startTime: s.startTime});
-      });
-      summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
-    }
+    let liveTimers = [];
 
-    setInterval(()=>{
-      liveTimers.forEach(obj => obj.span.textContent = formatTimeAgo(obj.startTime));
-    },1000);
+    async function linkOfProcessing(){
+      const container=document.getElementById("processing");
+      const summary=document.getElementById("share-summary");
+      const processContainer=document.getElementById("process-container");
+      
+      const refresh = async ()=>{
+        try{
+          const res = await fetch("/total");
+          if(!res.ok) return;
+          const data = await res.json();
+          container.innerHTML="";
+          liveTimers = [];
+          let totalCount=0, totalTarget=0;
+          if(data.length===0){ processContainer.style.display="none"; summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; return; }
+          processContainer.style.display="block";
+          data.forEach((link,index)=>{
+            let {count,id,target,status,startTime}=link;
+            totalCount+=count; totalTarget+=parseInt(target);
+            const processCard=document.createElement("div");
+            processCard.classList.add("current-online");
+            let color="#ffc107"; if(status==="success") color="#32ff7e"; if(status==="failed") color="#ff4e4e";
+            const timeSpan = document.createElement('span');
+            timeSpan.style.fontSize="12px"; timeSpan.style.color="#aaa";
+            processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target} </div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
+            processCard.querySelector('.status-row').appendChild(timeSpan);
+            container.appendChild(processCard);
+
+            // live timer
+            if(startTime){
+              liveTimers.push({span: timeSpan, startTime});
+              timeSpan.textContent = formatTimeAgo(startTime);
+            } else timeSpan.textContent = 'Just now';
+          });
+          summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
+        }catch(err){ console.error(err); }
+      };
+      refreshInterval=setInterval(refresh,1000); refresh();
+      setInterval(()=>{
+        liveTimers.forEach(obj => obj.span.textContent = formatTimeAgo(obj.startTime));
+      },1000);
+    }
+    linkOfProcessing();
 
     document.getElementById("stop-button").addEventListener("click", async ()=>{
       const result = document.getElementById("result");
-      if(Object.keys(activeSessions).length === 0){ 
+      if(!currentId){ 
         result.style.display = "block";
         result.style.backgroundColor = "#3D1619";
         result.style.color = "#FE6265";
         result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> No active session to stop';
         return; 
       }
-      // Stop all active sessions
-      for(let id of Object.keys(activeSessions)){
-        try{
-          const res=await fetch("/api/stop",{ 
-            method:"POST", 
-            headers:{"Content-Type":"application/json"}, 
-            body:JSON.stringify({id})
-          });
-          const data=await res.json();
-          if(data.status===200){ 
-            delete activeSessions[id];
-          }
-        }catch(err){ console.error("Stop request failed",err); }
+      try{
+        const res=await fetch("/api/stop",{ 
+          method:"POST", 
+          headers:{"Content-Type":"application/json"}, 
+          body:JSON.stringify({id:currentId})
+        });
+        const data=await res.json();
+        if(data.status===200){ 
+          if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; } 
+          document.getElementById("processing").innerHTML='<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.'; 
+          document.getElementById("share-summary").innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; 
+          result.style.display="block";
+          result.style.backgroundColor="#1e4620";
+          result.style.color="#32ff7e";
+          result.innerHTML='<i class="fa-solid fa-circle-check"></i> Session stopped successfully';
+          currentId=null; 
+        }
+        else{ 
+          result.style.display="block";
+          result.style.backgroundColor="#3D1619";
+          result.style.color="#FE6265";
+          result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: '+(data.error||"Unknown");
+        }
+      }catch(err){ 
+        console.error("Stop request failed",err); 
+        result.style.display="block";
+        result.style.backgroundColor="#3D1619";
+        result.style.color="#FE6265";
+        result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Failed to stop session';
       }
-      updateProcessing();
-      result.style.display="block";
-      result.style.backgroundColor="#1e4620";
-      result.style.color="#32ff7e";
-      result.innerHTML='<i class="fa-solid fa-circle-check"></i> All sessions stopped successfully';
     });
 
     // Cookie to AppState
