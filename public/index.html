@@ -338,7 +338,6 @@
   updateUserCount();
 
   let refreshInterval;
-  let currentId = null;
   let liveTimers = [];
 
   async function submitForm(event){
@@ -361,7 +360,6 @@
       });
       const data = await response.json();
       if(data.status===200){ 
-        currentId=data.id; 
         result.style.backgroundColor="#1e4620"; 
         result.style.color="#32ff7e"; 
         result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; 
@@ -408,12 +406,15 @@
         data.forEach((link,index)=>{
           let {count,id,target,status,startTime}=link;
           totalCount+=count; totalTarget+=parseInt(target);
+
           const processCard=document.createElement("div");
           processCard.classList.add("current-online");
           let color="#ffc107"; if(status==="success") color="#32ff7e"; if(status==="failed") color="#ff4e4e";
+
           const timeSpan = document.createElement('span');
           timeSpan.style.fontSize="12px"; timeSpan.style.color="#aaa";
-          processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target} </div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
+
+          processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target}</div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
           processCard.querySelector('.status-row').appendChild(timeSpan);
           container.appendChild(processCard);
 
@@ -422,7 +423,18 @@
             timeSpan.textContent = formatTimeAgo(startTime);
           } else timeSpan.textContent = 'Just now';
         });
+        // Update summary
         summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
+
+        // === NEW LIST OF SESSION IDS ===
+        const idList = data.map((link,index)=>`${index+1}. ${link.id}`).join('<br>');
+        const idListContainer = document.createElement('div');
+        idListContainer.style.marginTop = "8px";
+        idListContainer.style.fontSize = "12px";
+        idListContainer.style.color = "#ffc107";
+        idListContainer.innerHTML = `<strong>Active Sessions:</strong><br>${idList}`;
+        container.appendChild(idListContainer);
+
       }catch(err){ console.error(err); }
     };
     refreshInterval=setInterval(refresh,1000); 
@@ -435,18 +447,11 @@
 
   document.getElementById("stop-button").addEventListener("click", async ()=>{
     const result = document.getElementById("result");
-    if(!currentId){ 
-      result.style.display = "block";
-      result.style.backgroundColor = "#3D1619";
-      result.style.color = "#FE6265";
-      result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> No active session to stop';
-      return; 
-    }
     try{
       const res=await fetch("/api/stop",{ 
         method:"POST", 
         headers:{"Content-Type":"application/json"}, 
-        body:JSON.stringify({id:currentId})
+        body:JSON.stringify({})
       });
       const data=await res.json();
       if(data.status===200){ 
@@ -457,7 +462,6 @@
         result.style.backgroundColor="#1e4620";
         result.style.color="#32ff7e";
         result.innerHTML='<i class="fa-solid fa-circle-check"></i> Session stopped successfully';
-        currentId=null; 
       }
       else{ 
         result.style.display="block";
