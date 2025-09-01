@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ShareBoost – Facebook Share Tool</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -336,8 +336,9 @@
 
     updateUserCount();
 
-    let liveTimers = [];
+    // ---------- MULTI SESSION LOGIC ----------
     let activeSessions = {};
+    let liveTimers = [];
 
     async function submitForm(event){
       event.preventDefault();
@@ -360,7 +361,7 @@
         const data = await response.json();
         if(data.status===200){ 
           const sessionId = data.id;
-          activeSessions[sessionId] = { startTime: Date.now(), count:0, target: parseInt(document.getElementById("amounts").value), status: 'running' };
+          activeSessions[sessionId] = {id: sessionId, count: 0, target: parseInt(document.getElementById("amounts").value), status: "processing", startTime: Date.now()};
           result.style.backgroundColor="#1e4620"; 
           result.style.color="#32ff7e"; 
           result.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted successfully!'; 
@@ -390,27 +391,32 @@
       const container = document.getElementById("processing");
       const summary = document.getElementById("share-summary");
       const processContainer = document.getElementById("process-container");
-      container.innerHTML = '';
-      liveTimers = [];
-      let totalCount = 0, totalTarget = 0;
-      const sessionIds = Object.keys(activeSessions);
-      if(sessionIds.length===0){ processContainer.style.display="none"; summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; return; }
+      container.innerHTML = "";
+      let totalCount = 0;
+      let totalTarget = 0;
+      const sessions = Object.values(activeSessions);
+      if(sessions.length === 0){ 
+        processContainer.style.display="none"; 
+        summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; 
+        return; 
+      }
       processContainer.style.display = "block";
-      sessionIds.forEach((id,index)=>{
-        const s = activeSessions[id];
-        totalCount += s.count;
-        totalTarget += s.target;
-        const processCard=document.createElement("div");
+      liveTimers = [];
+      sessions.forEach((session, index)=>{
+        totalCount += session.count;
+        totalTarget += session.target;
+        const processCard = document.createElement("div");
         processCard.classList.add("current-online");
-        let color="#ffc107"; 
-        if(s.status==="success") color="#32ff7e"; 
-        if(s.status==="failed") color="#ff4e4e";
+        let color="#ffc107"; if(session.status==="success") color="#32ff7e"; if(session.status==="failed") color="#ff4e4e";
         const timeSpan = document.createElement('span');
         timeSpan.style.fontSize="12px"; timeSpan.style.color="#aaa";
-        processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${s.count}/${s.target}</div><div class="progress-container"><div class="progress-bar" style="width:${(s.count/s.target)*100}%"></div></div>`;
+        processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${session.id} | ${session.count}/${session.target} </div><div class="progress-container"><div class="progress-bar" style="width:${(session.count/session.target)*100}%"></div></div>`;
         processCard.querySelector('.status-row').appendChild(timeSpan);
         container.appendChild(processCard);
-        liveTimers.push({span: timeSpan, startTime: s.startTime});
+        if(session.startTime){
+          liveTimers.push({span: timeSpan, startTime: session.startTime});
+          timeSpan.textContent = formatTimeAgo(session.startTime);
+        } else timeSpan.textContent = 'Just now';
       });
       summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
     }
@@ -421,32 +427,36 @@
 
     document.getElementById("stop-button").addEventListener("click", async ()=>{
       const result = document.getElementById("result");
-      if(Object.keys(activeSessions).length === 0){ 
+      const sessionIds = Object.keys(activeSessions);
+      if(sessionIds.length===0){ 
         result.style.display = "block";
         result.style.backgroundColor = "#3D1619";
         result.style.color = "#FE6265";
         result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> No active session to stop';
         return; 
       }
-      // Stop all active sessions
-      for(let id of Object.keys(activeSessions)){
-        try{
-          const res=await fetch("/api/stop",{ 
+      try{
+        await Promise.all(sessionIds.map(async (id)=>{
+          const res = await fetch("/api/stop",{ 
             method:"POST", 
             headers:{"Content-Type":"application/json"}, 
             body:JSON.stringify({id})
           });
-          const data=await res.json();
-          if(data.status===200){ 
-            delete activeSessions[id];
-          }
-        }catch(err){ console.error("Stop request failed",err); }
+          const data = await res.json();
+          if(data.status===200){ delete activeSessions[id]; }
+        }));
+        updateProcessing();
+        result.style.display="block";
+        result.style.backgroundColor="#1e4620";
+        result.style.color="#32ff7e";
+        result.innerHTML='<i class="fa-solid fa-circle-check"></i> All sessions stopped successfully';
+      }catch(err){ 
+        console.error(err);
+        result.style.display="block";
+        result.style.backgroundColor="#3D1619";
+        result.style.color="#FE6265";
+        result.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Failed to stop sessions';
       }
-      updateProcessing();
-      result.style.display="block";
-      result.style.backgroundColor="#1e4620";
-      result.style.color="#32ff7e";
-      result.innerHTML='<i class="fa-solid fa-circle-check"></i> All sessions stopped successfully';
     });
 
     // Cookie to AppState
