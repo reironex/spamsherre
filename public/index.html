@@ -16,6 +16,24 @@
       padding: 0;
       transition: background 0.3s, color 0.3s;
     }
+
+    h1 {
+  color: #ff4ecd;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: text-shadow 0.3s ease-in-out;
+}
+
+/* Glow effect class (idadagdag lang, wag papalitan yung nasa taas) */
+h1.glow {
+  text-shadow: 0 0 10px #ff4ecd, 
+               0 0 20px #ff4ecd, 
+               0 0 30px #ff4ecd, 
+               0 0 40px #ff4ecd;
+  transition: text-shadow 0.3s ease-in-out;
+  cursor: pointer;
+
+}
     body.light-mode { background: #f4f4f4; color: #222; }
     h1 { color: #ff4ecd; margin-top: 20px; }
     body.light-mode h1 { color: #e91e63; }
@@ -203,8 +221,7 @@
     <span class="slider"></span>
   </label>
 </div>
-
-<h1><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
+<h1 id="title"><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
 <div class="tagline" id="tagline"></div>
 
 <div id="auth-container">
@@ -257,6 +274,12 @@
 </div>
 
 <script>
+  // === Title Glow Toggle ===
+const title = document.getElementById("title");
+title.addEventListener("click", () => {
+  title.classList.toggle("glow");
+});
+  
   // === Theme toggle ===
   const toggleBtn = document.getElementById('mode-toggle');
   if(localStorage.getItem('theme') === 'light') {
