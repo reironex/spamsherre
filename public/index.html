@@ -211,22 +211,79 @@ h1.glow {
       transition: background 0.3s, color 0.3s;
     }
     body.light-mode #user-count { background: #eee; color: #222; }
-    /* Ayusin layout ng form fields */
+    /* Ayusin layout ng form fields (lahat ng inputs pare-pareho na ang style) */
 form input[type="text"],
-form input[type="number"] {
+form input[type="number"],
+form input[type="password"] {
   display: block;
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 12px;
   padding: 10px 12px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: #2a2a3d;
+  color: #eee;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+/* Focus effect (glow sa pink violet kapag nagta-type ka) */
+form input[type="text"]:focus,
+form input[type="number"]:focus,
+form input[type="password"]:focus {
+  border: 2px solid #ff4ecd;
+  box-shadow: 0 0 8px rgba(255, 78, 205, 0.5);
+  outline: none;
 }
 
 /* Wrapper ng bawat label at input */
 .form-group {
   margin-bottom: 15px;
   text-align: left;
-
 }
+
+    /* Button container para pantay */
+.btn-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* General button style */
+.btn-container button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+/* Start button (gradient + glow) */
+#submit-button {
+  background: linear-gradient(135deg, #ff4ecd, #a74fff);
+  box-shadow: 0 4px 12px rgba(255, 78, 205, 0.4);
+}
+#submit-button:hover {
+  background: linear-gradient(135deg, #ff6fe1, #b26bff);
+  box-shadow: 0 6px 16px rgba(255, 78, 205, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Stop button (red theme) */
+#stop-button {
+  background: linear-gradient(135deg, #ff4444, #cc0000);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
+}
+#stop-button:hover {
+  background: linear-gradient(135deg, #ff6666, #e60000);
+  box-shadow: 0 6px 16px rgba(255, 0, 0, 0.6);
+  transform: translateY(-2px);
+}
+
   </style>
 </head>
 <body>
