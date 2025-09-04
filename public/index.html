@@ -361,7 +361,19 @@ form input[type="password"]:focus {
   transform: scale(1.02);
   box-shadow: 0 0 10px rgba(167, 79, 255, 0.6);
 }
+.skeleton-card {
+  height: 50px;
+  background: linear-gradient(90deg, #2a2a3d 25%, #1c1c2b 50%, #2a2a3d 75%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  animation: shimmer 1.5s infinite;
+}
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
   </style>
 </head>
 <body>
@@ -581,54 +593,65 @@ title.addEventListener("click", () => {
     const summary=document.getElementById("share-summary");
     const processContainer=document.getElementById("process-container");
     
-    const refresh = async ()=>{
-      try{
-        const res = await fetch("/total");
-        if(!res.ok) return;
-        const data = await res.json();
-        container.innerHTML="";
-        liveTimers = [];
-        let totalCount=0, totalTarget=0;
-        if(data.length===0){ 
-          processContainer.style.display="none"; 
-          summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; 
-          return; 
-        }
-        processContainer.style.display="block";
-        data.forEach((link,index)=>{
-          let {count,id,target,status,startTime}=link;
-          totalCount+=count; totalTarget+=parseInt(target);
+    const refresh = async () => {
+  try {
+    container.innerHTML = '';
+    summary.innerHTML = '';
 
-          const processCard=document.createElement("div");
-          processCard.classList.add("current-online");
-          let color="#ffc107"; if(status==="success") color="#32ff7e"; if(status==="failed") color="#ff4e4e";
+    // ✅ Skeleton loader (3 placeholders)
+    for(let i=0;i<3;i++){
+      const skeleton = document.createElement('div');
+      skeleton.className = 'skeleton-card';
+      container.appendChild(skeleton);
+    }
 
-          const timeSpan = document.createElement('span');
-          timeSpan.style.fontSize="12px"; timeSpan.style.color="#aaa";
+    // Fetch real data
+    const res = await fetch("/total");
+    const data = await res.json();
 
-          processCard.innerHTML=`<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target}</div><div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
-          processCard.querySelector('.status-row').appendChild(timeSpan);
-          container.appendChild(processCard);
+    // Clear skeletons
+    container.innerHTML = '';
+    liveTimers = [];
+    let totalCount=0, totalTarget=0;
 
-          if(startTime){
-            liveTimers.push({span: timeSpan, startTime});
-            timeSpan.textContent = formatTimeAgo(startTime);
-          } else timeSpan.textContent = 'Just now';
-        });
-        // Update summary
-        summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
+    if(data.length===0){ 
+      processContainer.style.display="none"; 
+      summary.innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; 
+      return; 
+    }
 
-        // === NEW LIST OF SESSION IDS ===
-        const idList = data.map((link,index)=>`${index+1}. ${link.id}`).join('<br>');
-        const idListContainer = document.createElement('div');
-        idListContainer.style.marginTop = "8px";
-        idListContainer.style.fontSize = "12px";
-        idListContainer.style.color = "#ffc107";
-        idListContainer.innerHTML = `<strong>Active Sessions:</strong><br>${idList}`;
-        container.appendChild(idListContainer);
+    processContainer.style.display="block";
 
-      }catch(err){ console.error(err); }
-    };
+    data.forEach((link,index)=>{
+      let {count,id,target,status,startTime}=link;
+      totalCount+=count; totalTarget+=parseInt(target);
+
+      const processCard=document.createElement("div");
+      processCard.classList.add("current-online");
+      let color="#ffc107"; 
+      if(status==="success") color="#32ff7e"; 
+      if(status==="failed") color="#ff4e4e";
+
+      const timeSpan = document.createElement('span');
+      timeSpan.style.fontSize="12px"; 
+      timeSpan.style.color="#aaa";
+
+      processCard.innerHTML = `<div class="status-row"><span class="status-icon" style="background:${color}"></span>${index+1}. ID: ${id} | ${count}/${target}</div>
+                               <div class="progress-container"><div class="progress-bar" style="width:${(count/target)*100}%"></div></div>`;
+      processCard.querySelector('.status-row').appendChild(timeSpan);
+      container.appendChild(processCard);
+
+      if(startTime){ 
+        liveTimers.push({span: timeSpan, startTime}); 
+        timeSpan.textContent = formatTimeAgo(startTime); 
+      } else timeSpan.textContent = 'Just now';
+    });
+
+    // Update summary
+    summary.innerHTML = `<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
+
+  } catch(err){ console.error(err); }
+};
     refreshInterval=setInterval(refresh,1000); 
     refresh();
     setInterval(()=>{
