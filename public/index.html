@@ -638,37 +638,38 @@ title.addEventListener("click", () => {
   linkOfProcessing();
 
   document.getElementById("stop-button").addEventListener("click", async ()=>{
-    const result = document.getElementById("result");
-    try{
-      const res=await fetch("/api/stop",{ 
-        method:"POST", 
-        headers:{"Content-Type":"application/json"}, 
-        body:JSON.stringify({})
-      });
-      const data=await res.json();
-      if(data.status===200){ 
-        if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; } 
-        document.getElementById("processing").innerHTML='<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.'; 
-        document.getElementById("share-summary").innerHTML='<i class="fa-solid fa-chart-pie"></i> Total Shares: 0'; 
-        result.style.display="block";
-        result.style.backgroundColor="#1e4620";
-        result.style.color="#32ff7e";
-        result.innerHTML='<i class="fa-solid fa-circle-check"></i> Session stopped successfully';
+  const result = document.getElementById("result");
+  try {
+    const res = await fetch("/api/stop", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({})
+    });
+    const data = await res.json();
+    result.style.display = "block";
+    if (data.status === 200) {
+      if (refreshInterval) { 
+        clearInterval(refreshInterval); 
+        refreshInterval = null; 
       }
-      else{ 
-        result.style.display="block";
-        result.style.backgroundColor="#3D1619";
-        result.style.color="#FE6265";
-        result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: '+(data.error||"Unknown");
-      }
-    }catch(err){ 
-      console.error("Stop request failed",err); 
-      result.style.display="block";
-      result.style.backgroundColor="#3D1619";
-      result.style.color="#FE6265";
-      result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Failed to stop session';
+      document.getElementById("processing").innerHTML = '<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.';
+      document.getElementById("share-summary").innerHTML = '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
+      
+      // ✅ gamit success class
+      result.className = "success";
+      result.innerHTML = '<i class="fa-solid fa-circle-check"></i> Session stopped successfully';
+    } else {
+      // ❌ gamit error class
+      result.className = "error";
+      result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: ' + (data.error || "Unknown");
     }
-  });
+  } catch (err) {
+    console.error("Stop request failed", err);
+    result.style.display = "block";
+    result.className = "error";
+    result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Failed to stop session';
+  }
+});
 
   // Cookie to AppState
   const cookieInput = document.getElementById('cookies');
