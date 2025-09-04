@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ShareBoost – Facebook Share Tool</title>
+  <title>ShareBoost â€“ Facebook Share Tool</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
     /* === Keep all your previous styles === */
@@ -432,9 +432,6 @@ title.addEventListener("click", () => {
         processContainer.style.display="block";
         data.forEach((link,index)=>{
           let {count,id,target,status,startTime}=link;
-          if(!allSessions.find(s => s.id === id)){
-  allSessions.push({id, startTime, status});
-}
           totalCount+=count; totalTarget+=parseInt(target);
 
           const processCard=document.createElement("div");
@@ -455,15 +452,6 @@ title.addEventListener("click", () => {
         });
         // Update summary
         summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
-        // === Update Session History ===
-const historyContainer = document.getElementById("session-history");
-if(allSessions.length > 0){
-  historyContainer.innerHTML = "<strong>Session History:</strong><br>";
-  allSessions.forEach((s,i)=>{
-    historyContainer.innerHTML += `${i+1}. UID: <b>${s.id}</b> — Started: ${formatDateTime(s.startTime)} — Status: ${s.status || "Unknown"}<br>`;
-  });
-}
-
 
         // === NEW LIST OF SESSION IDS ===
         const idList = data.map((link,index)=>`${index+1}. ${link.id}`).join('<br>');
