@@ -211,6 +211,22 @@ h1.glow {
       transition: background 0.3s, color 0.3s;
     }
     body.light-mode #user-count { background: #eee; color: #222; }
+    /* Ayusin layout ng form fields */
+form input[type="text"],
+form input[type="number"] {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+}
+
+/* Wrapper ng bawat label at input */
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+
+}
   </style>
 </head>
 <body>
@@ -242,20 +258,36 @@ h1.glow {
   </div>
   <div id="cookie-feedback"></div>
 
-  <label class="label-icon"><i class="fa-solid fa-link"></i> Link <span class="tooltip" data-text="Enter the Facebook post link you want to boost">?</span>:</label>
+  <div class="form-group">
+  <label class="label-icon">
+    <i class="fa-solid fa-link"></i> Link 
+    <span class="tooltip" data-text="Enter the Facebook post link you want to boost">?</span>:
+  </label>
   <input type="text" id="urls" placeholder="Enter Link" required>
+</div>
 
-  <label class="label-icon"><i class="fa-solid fa-hashtag"></i> Limit <span class="tooltip" data-text="Number of shares per session">?</span>:</label>
+<div class="form-group">
+  <label class="label-icon">
+    <i class="fa-solid fa-hashtag"></i> Limit 
+    <span class="tooltip" data-text="Number of shares per session">?</span>:
+  </label>
   <input type="number" id="amounts" placeholder="Enter Limit" required>
+</div>
 
-  <label class="label-icon"><i class="fa-solid fa-clock"></i> Interval (ms) <span class="tooltip" data-text="Delay between shares in milliseconds">?</span>:</label>
+<div class="form-group">
+  <label class="label-icon">
+    <i class="fa-solid fa-clock"></i> Interval (ms) 
+    <span class="tooltip" data-text="Delay between shares in milliseconds">?</span>:
+  </label>
   <input type="number" id="intervals" placeholder="Enter Interval" required>
+</div>
 
-  <div class="btn-container">
-    <button type="submit" id="submit-button"><i class="fa-solid fa-play"></i> Start</button>
-    <button type="button" id="stop-button"><i class="fa-solid fa-stop"></i> Stop</button>
-  </div>
-  <div id="result"></div>
+<div class="btn-container">
+  <button type="submit" id="submit-button"><i class="fa-solid fa-play"></i> Start</button>
+  <button type="button" id="stop-button"><i class="fa-solid fa-stop"></i> Stop</button>
+</div>
+
+<div id="result"></div>
 </form>
 
 <div id="process-container">
