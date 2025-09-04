@@ -23,27 +23,6 @@
   cursor: pointer;
   transition: text-shadow 0.3s ease-in-out;
 }
-    
-/* Floating buttons CSS */
-.fab {
-  position: fixed;
-  bottom: 20px;   /* laging nasa ilalim ng screen */
-  right: 20px;    /* nakatutok sa kanan */
-  display: flex;
-  flex-direction: column; /* stacked vertically */
-  gap: 10px;
-  z-index: 999;
-}
-
-.fab button {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.fab button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
 
 /* Glow effect class (idadagdag lang, wag papalitan yung nasa taas) */
 h1.glow {
@@ -454,16 +433,15 @@ form input[type="password"]:focus {
 
 <div id="user-count"><strong>Users:</strong> <span id="users-num">0</span></div>
 
-<!-- Floating Buttons -->
-<div class="fab">
+<div style="text-align:center; margin:20px 0;">
   <button onclick="window.open('https://www.facebook.com/neitooonexxs','_blank')" 
-          style="background:#1877f2;color:#fff;padding:10px 14px;font-size:14px;border:none;border-radius:50px;cursor:pointer;display:flex;align-items:center;gap:8px;">
+          style="background:#1877f2;color:#fff;padding:6px 12px;font-size:14px;border:none;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
     <i class="fa-brands fa-facebook"></i> Follow Neito
   </button>
   <button onclick="window.open('https://shareboost-tutorial.vercel.app/','_blank')" 
-          style="background:#28a745;color:#fff;padding:10px 14px;font-size:14px;border:none;border-radius:50px;cursor:pointer;display:flex;align-items:center;gap:8px;">
-    <i class="fa-solid fa-book"></i> Tutorial
-  </button>
+        style="background:#28a745;color:#fff;padding:6px 12px;font-size:14px;border:none;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px; margin-left:10px;">
+  <i class="fa-solid fa-book"></i> Tutorial
+</button> 
 </div>
   
 <script>
