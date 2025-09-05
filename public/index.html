@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ShareBoost Ã¢â‚¬â€œ Facebook Share Tool</title>
+  <title>ShareBoost ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Facebook Share Tool</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
     /* === Keep all your previous styles === */
@@ -662,13 +662,11 @@ title.addEventListener("click", () => {
       document.getElementById("processing").innerHTML = '<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.';
       document.getElementById("share-summary").innerHTML = '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
       
-      // âœ… gamit success class
+      // Ã¢Å“â€¦ gamit success class
       result.className = "success";
       result.innerHTML = '<i class="fa-solid fa-circle-check"></i> Session stopped successfully';
-      saveSession(document.getElementById("urls").value);
-      
     } else {
-      // âŒ gamit error class
+      // Ã¢ÂÅ’ gamit error class
       result.className = "error";
       result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: ' + (data.error || "Unknown");
     }
@@ -745,61 +743,6 @@ title.addEventListener("click", () => {
       console.error(e);
     }
   });
-
-  // === SESSION HISTORY HANDLER ===
-const historyKey = "sessionHistory";
-const historyContainer = document.createElement("div");
-historyContainer.id = "history-container";
-historyContainer.style.maxWidth = "450px";
-historyContainer.style.margin = "20px auto";
-historyContainer.style.padding = "12px";
-historyContainer.style.background = "#1a1a27";
-historyContainer.style.borderRadius = "8px";
-historyContainer.style.color = "#eee";
-historyContainer.innerHTML = `
-  <h3><i class='fa-solid fa-clock-rotate-left'></i> Session History</h3>
-  <div id='history-list'></div>
-  <button id='clear-history' style='margin-top:10px;padding:6px 12px;
-    border:none;border-radius:6px;background:#ff4e4e;color:#fff;cursor:pointer;'>
-    <i class='fa-solid fa-trash'></i> Clear History
-  </button>`;
-document.body.appendChild(historyContainer);
-
-function loadHistory() {
-  const list = document.getElementById("history-list");
-  list.innerHTML = "";
-  let history = JSON.parse(localStorage.getItem(historyKey) || "[]");
-  if (history.length === 0) {
-    list.innerHTML = "<p style='font-size:14px;color:#aaa;'>No previous sessions.</p>";
-    return;
-  }
-  history.forEach((item, index) => {
-    const div = document.createElement("div");
-    div.style.padding = "6px";
-    div.style.marginBottom = "6px";
-    div.style.borderBottom = "1px solid #444";
-    div.innerHTML = `
-      <strong>${index + 1}.</strong> 
-      Post ID: <span style="color:#ff4ecd">${item.id}</span><br>
-      <small>${new Date(item.time).toLocaleString()}</small>`;
-    list.appendChild(div);
-  });
-}
-
-function saveSession(id) {
-  let history = JSON.parse(localStorage.getItem(historyKey) || "[]");
-  history.unshift({ id: id, time: Date.now() });
-  if (history.length > 10) history.pop();
-  localStorage.setItem(historyKey, JSON.stringify(history));
-  loadHistory();
-}
-
-document.getElementById("clear-history").addEventListener("click", () => {
-  localStorage.removeItem(historyKey);
-  loadHistory();
-});
-
-loadHistory();
 </script>
 </body>
 </html>
