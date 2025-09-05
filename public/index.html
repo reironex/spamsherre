@@ -361,11 +361,46 @@ form input[type="password"]:focus {
   transform: scale(1.02);
   box-shadow: 0 0 10px rgba(167, 79, 255, 0.6);
 }
+    /* Particles Container */
+.particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* para hindi maapektuhan ang buttons */
+  overflow: hidden;
+  z-index: 0; /* nasa likod ng lahat */
+}
+
+/* Particle Dots */
+.particles::before,
+.particles::after {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.4) 2px, transparent 2px);
+  background-size: 50px 50px; /* layo ng particles */
+  animation: floatParticles 60s linear infinite;
+}
+
+.particles::after {
+  background-image: radial-gradient(circle, rgba(255,0,128,0.4) 2px, transparent 2px);
+  animation-duration: 100s; /* iba-ibang bilis */
+}
+
+/* Floating Animation */
+@keyframes floatParticles {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100px); }
+}
 
   </style>
 </head>
 <body>
-
+  
+<div class="particles"></div>
 <div id="mode-toggle-container">
   <label class="switch">
     <input type="checkbox" id="mode-toggle">
