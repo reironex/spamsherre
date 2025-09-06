@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ShareBoost – Facebook Share Tool</title>
+<title>ShareBoost â€“ Facebook Share Tool</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
     /* === Keep all your previous styles === */
@@ -361,28 +361,29 @@ form input[type="password"]:focus {
   transform: scale(1.02);
   box-shadow: 0 0 10px rgba(167, 79, 255, 0.6);
 }
-  .btn-loading::after {
+    .btn-loading {
+  position: relative;
+  pointer-events: none; /* para hindi ulit ma-click */
+  opacity: 0.7;
+}
+
+.btn-loading::after {
   content: "";
   position: absolute;
   right: 10px;
   top: 50%;
   width: 16px;
   height: 16px;
+  border: 2px solid #ff4ecd;
+  border-top: 2px solid #a74fff;
   border-radius: 50%;
-  background: conic-gradient(#ff4ecd, #a74fff, #ff4ecd);
   transform: translateY(-50%);
-  animation: spin-glow 1s linear infinite, pulse-glow 1.5s ease-in-out infinite;
-  box-shadow: 0 0 8px #ff4ecd, 0 0 12px #a74fff;
+  animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin-glow {
-  0% { transform: translateY(-50%) rotate(0deg); }
-  100% { transform: translateY(-50%) rotate(360deg); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { transform: translateY(-50%) scale(1); opacity: 1; }
-  50% { transform: translateY(-50%) scale(1.2); opacity: 0.8; }
+@keyframes spin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
 }
   </style>
 </head>
@@ -709,11 +710,11 @@ function login() {
       document.getElementById("processing").innerHTML = '<i class="fa-solid fa-circle-stop"></i> Sharing Stopped.';
       document.getElementById("share-summary").innerHTML = '<i class="fa-solid fa-chart-pie"></i> Total Shares: 0';
       
-      // Ã¢Å“â€¦ gamit success class
+      // ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ gamit success class
       result.className = "success";
       result.innerHTML = '<i class="fa-solid fa-circle-check"></i> Session stopped successfully';
     } else {
-      // Ã¢ÂÅ’ gamit error class
+      // ÃƒÂ¢Ã‚ÂÃ…â€™ gamit error class
       result.className = "error";
       result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: ' + (data.error || "Unknown");
     }
