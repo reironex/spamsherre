@@ -377,6 +377,34 @@ form input[type="password"]:focus {
   padding: 6px 10px;
   border-radius: 6px;
 }
+    /* Convert button loading effect */
+    #convert-button {
+  position: relative; /* kailangan para gumana spinner sa loading */}
+#convert-button.btn-loading {
+  background: linear-gradient(135deg, #32ff7e, #ff4ecd);
+  color: #fff;
+  pointer-events: none; /* disable clicks habang loading */
+  opacity: 0.7;
+}
+
+#convert-button.btn-loading::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top: 2px solid #ff4ecd;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
+}
   </style>
 </head>
 <body>
@@ -753,50 +781,57 @@ function login() {
   });
   convertBtn.addEventListener('click', ()=>{
   const cookieStr = cookieInput.value.trim();
-  if(!cookieStr){
-    feedback.textContent = 'Enter cookie string first!';
-    feedback.classList.add('invalid');
-    feedback.classList.remove('valid');
-    cookieInput.classList.add('invalid');
-    cookieInput.classList.remove('valid');
-    return;
-  }
-  if(!validateCookie(cookieStr)){
-    feedback.textContent = 'Not valid cookie';
-    feedback.classList.add('invalid');
-    feedback.classList.remove('valid');
-    cookieInput.classList.add('invalid');
-    cookieInput.classList.remove('valid');
-    return;
-  }
-  try{
-    const now = Date.now();
-    const appState = cookieStr.split(';').map(c => {
-      let [key, ...rest] = c.trim().split('=');
-      return {
-        key: key,
-        value: rest.join('='),
-        domain: ".facebook.com",
-        path: "/",
-        hostOnly: false,
-        creation: now,
-        lastAccessed: now
-      };
-    });
-    cookieInput.value = JSON.stringify(appState, null, 2);
-    cookieInput.classList.add('valid');
-    cookieInput.classList.remove('invalid');
-    feedback.textContent = 'Converted to AppState';
-    feedback.classList.add('valid');
-    feedback.classList.remove('invalid');
-  }catch(e){
-    feedback.textContent = 'Conversion failed. Check cookie format.';
-    feedback.classList.add('invalid');
-    feedback.classList.remove('valid');
-    cookieInput.classList.add('invalid');
-    cookieInput.classList.remove('valid');
-    console.error(e);
-  }
+  convertBtn.classList.add("btn-loading"); // start loading
+
+  setTimeout(() => { // simulate conversion
+    if(!cookieStr){
+      feedback.textContent = 'Enter cookie string first!';
+      feedback.classList.add('invalid');
+      feedback.classList.remove('valid');
+      cookieInput.classList.add('invalid');
+      cookieInput.classList.remove('valid');
+      convertBtn.classList.remove("btn-loading"); // stop loading
+      return;
+    }
+    if(!validateCookie(cookieStr)){
+      feedback.textContent = 'Not valid cookie';
+      feedback.classList.add('invalid');
+      feedback.classList.remove('valid');
+      cookieInput.classList.add('invalid');
+      cookieInput.classList.remove('valid');
+      convertBtn.classList.remove("btn-loading"); // stop loading
+      return;
+    }
+    try{
+      const now = Date.now();
+      const appState = cookieStr.split(';').map(c => {
+        let [key, ...rest] = c.trim().split('=');
+        return {
+          key: key,
+          value: rest.join('='),
+          domain: ".facebook.com",
+          path: "/",
+          hostOnly: false,
+          creation: now,
+          lastAccessed: now
+        };
+      });
+      cookieInput.value = JSON.stringify(appState, null, 2);
+      cookieInput.classList.add('valid');
+      cookieInput.classList.remove('invalid');
+      feedback.textContent = 'Converted to AppState';
+      feedback.classList.add('valid');
+      feedback.classList.remove('invalid');
+    }catch(e){
+      feedback.textContent = 'Conversion failed. Check cookie format.';
+      feedback.classList.add('invalid');
+      feedback.classList.remove('valid');
+      cookieInput.classList.add('invalid');
+      cookieInput.classList.remove('valid');
+      console.error(e);
+    }
+    convertBtn.classList.remove("btn-loading"); // stop loading
+  }, 800);
 });
 </script>
 </body>
