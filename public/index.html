@@ -374,16 +374,15 @@ form input[type="password"]:focus {
   top: 50%;
   width: 16px;
   height: 16px;
-  border: 2px solid #ff4ecd;
-  border-top: 2px solid #a74fff;
   border-radius: 50%;
+  background: conic-gradient(#ff4ecd, #a74fff, #ff4ecd);
   transform: translateY(-50%);
-  animation: spin 0.8s linear infinite;
+  animation: spin-gradient 1s linear infinite;
 }
 
-@keyframes spin {
-  from { transform: translateY(-50%) rotate(0deg); }
-  to { transform: translateY(-50%) rotate(360deg); }
+@keyframes spin-gradient {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
 }
   </style>
 </head>
