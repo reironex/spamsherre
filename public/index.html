@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ShareBoost ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Facebook Share Tool</title>
+<title>ShareBoost – Facebook Share Tool</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
     /* === Keep all your previous styles === */
@@ -361,7 +361,22 @@ form input[type="password"]:focus {
   transform: scale(1.02);
   box-shadow: 0 0 10px rgba(167, 79, 255, 0.6);
 }
-
+/* === Loading Spinner === */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}  
   </style>
 </head>
 <body>
@@ -743,6 +758,77 @@ title.addEventListener("click", () => {
       console.error(e);
     }
   });
+// === Loading Spinner Script ===
+function setLoading(button, isLoading, text) {
+  if (isLoading) {
+    button.disabled = true;
+    button.innerHTML = text + ' <span class="spinner"></span>';
+  } else {
+    button.disabled = false;
+    button.innerHTML = text;
+  }
+}
+
+// Elements para sa auth at main form
+const authContainer = document.getElementById('auth-container');
+const mainForm = document.getElementById('main-form');
+
+// Update user count
+function updateUserCount() {
+  let users = JSON.parse(localStorage.getItem('users') || '{}');
+  const count = Object.keys(users).length;
+  const counterEl = document.getElementById('user-count');
+  if (counterEl) counterEl.textContent = count;
+}
+
+// Override signup with spinner
+function signup() {
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value.trim();
+  const signupBtn = document.querySelector('#auth-container button[onclick="signup()"]');
+
+  if (!username || !password) { alert('Enter username & password'); return; }
+  let users = JSON.parse(localStorage.getItem('users') || '{}');
+  if (users[username]) { alert('Username exists'); return; }
+
+  setLoading(signupBtn, true, "Creating");
+  setTimeout(() => {
+    users[username] = password;
+    localStorage.setItem('users', JSON.stringify(users));
+    alert('Account created! Please login.');
+    updateUserCount();
+    setLoading(signupBtn, false, "Create Account");
+  }, 1500);
+}
+
+// Override login with spinner
+function login() {
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value.trim();
+  const loginBtn = document.querySelector('#auth-container button[onclick="login()"]');
+
+  if (!username || !password) { alert('Enter username & password'); return; }
+  let users = JSON.parse(localStorage.getItem('users') || '{}');
+
+  setLoading(loginBtn, true, "Logging in");
+  setTimeout(() => {
+    if (users[username] && users[username] === password) {
+      alert('Login successful!');
+      localStorage.setItem('currentUser', username);
+      if (document.getElementById('remember-me').checked) {
+        localStorage.setItem('rememberedUser', username);
+      } else {
+        localStorage.removeItem('rememberedUser');
+      }
+      if (authContainer) authContainer.style.display = 'none';
+      if (mainForm) mainForm.style.display = 'block';
+      updateUserCount();
+    } else {
+      alert('Invalid credentials');
+    }
+    setLoading(loginBtn, false, "Login");
+  }, 1500);
+}
 </script>
 </body>
 </html>
