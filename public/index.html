@@ -751,45 +751,53 @@ function login() {
       feedback.classList.remove('valid');
     }
   });
-
   convertBtn.addEventListener('click', ()=>{
-    const cookieStr = cookieInput.value.trim();
-    if(!cookieStr) return alert('Enter cookie string first!');
-    if(!validateCookie(cookieStr)){
-      alert('Not valid cookie');
-      return;
-    }
-    try{
-      const now = Date.now();
-      const appState = cookieStr.split(';').map(c => {
-        let [key, ...rest] = c.trim().split('=');
-        return {
-          key: key,
-          value: rest.join('='),
-          domain: ".facebook.com",
-          path: "/",
-          hostOnly: false,
-          creation: now,
-          lastAccessed: now
-        };
-      });
-      cookieInput.value = JSON.stringify(appState, null, 2);
-      cookieInput.classList.add('valid');
-      cookieInput.classList.remove('invalid');
-      feedback.textContent = 'Converted to AppState';
-      feedback.classList.add('valid');
-      feedback.classList.remove('invalid');
-      alert('Cookie converted to AppState!');
-    }catch(e){
-      alert('Failed to convert cookie. Check format.');
-      cookieInput.classList.add('invalid');
-      cookieInput.classList.remove('valid');
-      feedback.textContent = 'Conversion failed';
-      feedback.classList.add('invalid');
-      feedback.classList.remove('valid');
-      console.error(e);
-    }
-  });
+  const cookieStr = cookieInput.value.trim();
+  if(!cookieStr){
+    feedback.textContent = 'Enter cookie string first!';
+    feedback.classList.add('invalid');
+    feedback.classList.remove('valid');
+    cookieInput.classList.add('invalid');
+    cookieInput.classList.remove('valid');
+    return;
+  }
+  if(!validateCookie(cookieStr)){
+    feedback.textContent = 'Not valid cookie';
+    feedback.classList.add('invalid');
+    feedback.classList.remove('valid');
+    cookieInput.classList.add('invalid');
+    cookieInput.classList.remove('valid');
+    return;
+  }
+  try{
+    const now = Date.now();
+    const appState = cookieStr.split(';').map(c => {
+      let [key, ...rest] = c.trim().split('=');
+      return {
+        key: key,
+        value: rest.join('='),
+        domain: ".facebook.com",
+        path: "/",
+        hostOnly: false,
+        creation: now,
+        lastAccessed: now
+      };
+    });
+    cookieInput.value = JSON.stringify(appState, null, 2);
+    cookieInput.classList.add('valid');
+    cookieInput.classList.remove('invalid');
+    feedback.textContent = 'Converted to AppState';
+    feedback.classList.add('valid');
+    feedback.classList.remove('invalid');
+  }catch(e){
+    feedback.textContent = 'Conversion failed. Check cookie format.';
+    feedback.classList.add('invalid');
+    feedback.classList.remove('valid');
+    cookieInput.classList.add('invalid');
+    cookieInput.classList.remove('valid');
+    console.error(e);
+  }
+});
 </script>
 </body>
 </html>
