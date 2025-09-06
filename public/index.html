@@ -561,7 +561,7 @@ function login() {
     const username = document.getElementById('auth-username').value.trim();
     const password = document.getElementById('auth-password').value.trim();
     if(!username || !password){ 
-      alert('Enter username & password'); 
+      showAuthMessage('Enter username & password', 'error');
       loginBtn.classList.remove("btn-loading");
       return; 
     }
