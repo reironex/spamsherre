@@ -385,6 +385,21 @@ form input[type="password"]:focus {
   from { transform: translateY(-50%) rotate(0deg); }
   to { transform: translateY(-50%) rotate(360deg); }
 }
+    #auth-feedback.success {
+  border: 2px solid #32ff7e;
+  background: rgba(50, 255, 126, 0.1);
+  color: #32ff7e;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+#auth-feedback.error {
+  border: 2px solid #ff4e4e;
+  background: rgba(255, 78, 78, 0.1);
+  color: #ff4e4e;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
   </style>
 </head>
 <body>
@@ -407,7 +422,7 @@ form input[type="password"]:focus {
     <button onclick="signup()">Create Account</button>
   </div>
 </div>
-
+  <div id="auth-feedback" style="min-height:20px; margin-top:8px; font-weight:bold;"></div>
 <form id="main-form" onsubmit="submitForm(event)" style="display:none;">
   <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState <span class="tooltip" data-text="Paste your Facebook AppState or cookie string">?</span>:</label>
   <div style="display:flex; gap:5px; align-items:center; margin-bottom:5px;">
@@ -525,6 +540,13 @@ title.addEventListener("click", () => {
       document.getElementById('remember-me').checked = true;
     }
   });
+  
+  const authFeedback = document.getElementById('auth-feedback');
+
+function showAuthMessage(msg, type="success") {
+  authFeedback.textContent = msg;
+  authFeedback.className = type; // "success" o "error"
+}
 
   function signup() {
   const btns = document.querySelectorAll('.auth-btns button');
@@ -535,21 +557,21 @@ title.addEventListener("click", () => {
     const username = document.getElementById('auth-username').value.trim();
     const password = document.getElementById('auth-password').value.trim();
     if(!username || !password){ 
-      alert('Enter username & password'); 
+    showAuthMessage('Enter username & password', 'error');
       signupBtn.classList.remove("btn-loading");
       return; 
     }
     let users = JSON.parse(localStorage.getItem('users') || '{}');
     if(users[username]){ 
-      alert('Username exists'); 
-      signupBtn.classList.remove("btn-loading");
-      return; 
-    }
-    users[username] = password;
-    localStorage.setItem('users', JSON.stringify(users));
-    alert('Account created! Please login.');
-    updateUserCount();
-    signupBtn.classList.remove("btn-loading");
+  showAuthMessage('Username exists', 'error');
+  signupBtn.classList.remove("btn-loading");
+  return; 
+}
+
+users[username] = password;
+localStorage.setItem('users', JSON.stringify(users));
+showAuthMessage('Account created! Please login', 'success');
+signupBtn.classList.remove("btn-loading");
   }, 1000); // simulate loading (1s)
 }
 
@@ -568,7 +590,7 @@ function login() {
     }
     let users = JSON.parse(localStorage.getItem('users') || '{}');
     if(users[username] && users[username] === password){
-      alert('Login successful!');
+      showAuthMessage('Login successful!', 'success');
       localStorage.setItem('currentUser', username);
       if(document.getElementById('remember-me').checked){
         localStorage.setItem('rememberedUser', username);
@@ -579,7 +601,7 @@ function login() {
       mainForm.style.display = 'block';
       updateUserCount();
     } else{
-      alert('Invalid credentials');
+     showAuthMessage('Invalid credentials', 'error');
     }
     loginBtn.classList.remove("btn-loading");
   }, 1000); // simulate loading (1s)
