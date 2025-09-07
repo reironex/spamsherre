@@ -409,19 +409,25 @@ form input[type="password"]:focus {
 </head>
 <body>
   
-<audio autoplay loop style="display:none;">
+<audio id="bg-music" loop>
   <source src="https://drive.google.com/uc?export=download&id=1Bcl0vJiNvukp_BHq6AxVZsXq3AONPgEG" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
-  
+
 <div id="mode-toggle-container">
   <label class="switch">
     <input type="checkbox" id="mode-toggle">
     <span class="slider"></span>
   </label>
 </div>
+  
 <h1 id="title"><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
 <div class="tagline" id="tagline"></div>
+<div style="text-align:center; margin:20px 0;">
+  <button id="music-btn" style="background:#ff4ecd;color:#fff;padding:6px 12px;font-size:14px;border:none;border-radius:6px;cursor:pointer;">
+    <i class="fa-solid fa-play"></i> Play Music
+  </button>
+</div>
 
 <div id="auth-container">
   <input type="text" id="auth-username" placeholder="Username" required>
@@ -837,7 +843,20 @@ function login() {
     }
     convertBtn.classList.remove("btn-loading"); // stop loading
   }, 800);
+    
+const music = document.getElementById('bg-music');
+const musicBtn = document.getElementById('music-btn');
+
+musicBtn.addEventListener('click', () => {
+  if (music.paused) {
+    music.play();
+    musicBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause Music';
+  } else {
+    music.pause();
+    musicBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play Music';
+  }
 });
+  
 </script>
 </body>
 </html>
