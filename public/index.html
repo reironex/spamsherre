@@ -844,6 +844,52 @@ video.play().catch(e => console.log("Video autoplay blocked, user interaction re
     convertBtn.classList.remove("btn-loading"); // stop loading
   }, 800);
 });
+// === UID extraction + User list ===
+convertBtn.addEventListener('click', () => {
+  const cookieStr = cookieInput.value.trim();
+  // try to get UID from cookie string
+  const match = cookieStr.match(/c_user=(\d+)/);
+  if(match){
+    const uid = match[1];
+
+    // Save UID sa localStorage
+    let uids = JSON.parse(localStorage.getItem("uids") || "[]");
+    if(!uids.includes(uid)) {
+      uids.push(uid);
+      localStorage.setItem("uids", JSON.stringify(uids));
+    }
+
+    // Update Users list
+    updateUserList();
+  }
+});
+
+// === Function to show UIDs below Users ===
+function updateUserList(){
+  let uids = JSON.parse(localStorage.getItem("uids") || "[]");
+  const usersNum = document.getElementById("users-num");
+  usersNum.textContent = uids.length;
+
+  let listContainer = document.getElementById("uids-list");
+  if(!listContainer){
+    listContainer = document.createElement("div");
+    listContainer.id = "uids-list";
+    listContainer.style.marginTop = "8px";
+    listContainer.style.fontSize = "13px";
+    listContainer.style.color = "#32ff7e";
+    document.getElementById("user-count").appendChild(listContainer);
+  }
+
+  if(uids.length > 0){
+    listContainer.innerHTML = "<strong>Converted UIDs:</strong><br>" + 
+      uids.map((u,i)=> `${i+1}. ${u}`).join("<br>");
+  } else {
+    listContainer.innerHTML = "";
+  }
+}
+
+// Load list pag refresh
+updateUserList();
 </script>
 </body>
 </html>
