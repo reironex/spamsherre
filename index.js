@@ -46,15 +46,24 @@ app.post('/api/submit', async (req, res) => {
 // 🛑 STOP API
 app.post('/api/stop', (req, res) => {
   const { id } = req.body;
-  if (!id) return res.status(400).json({ error: 'Missing id' });
 
-  if (timers.has(id)) {
-    clearInterval(timers.get(id));
-    timers.delete(id);
-    total.delete(id);
-    return res.json({ status: 200, message: `Stopped session ${id}` });
+  if (id) {
+    if (timers.has(id)) {
+      clearInterval(timers.get(id));
+      timers.delete(id);
+      total.delete(id);
+      return res.json({ status: 200, message: `Session ${id} tinigil na` });
+    }
+    return res.status(404).json({ error: 'Walang active session na may ganitong id' });
   }
-  return res.status(404).json({ error: 'No active session with that id' });
+
+  // Kung walang id, ihinto lahat ng session
+  timers.forEach((timer, key) => {
+    clearInterval(timer);
+    total.delete(key);
+  });
+  timers.clear();
+  return res.json({ status: 200, message: 'Lahat ng sessions tinigil na' });
 });
 
 async function share(cookies, url, amount, interval) {
