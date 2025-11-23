@@ -6,6 +6,48 @@
 <title>ShareBoost — Facebook Share Tool</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
+    /* === MINI ACTION BUTTONS (Follow, Tutorial, Autoreact) === */
+.mini-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.25s;
+  box-shadow: 0 0 12px rgba(255,78,205,0.3);
+}
+
+/* FOLLOW BUTTON */
+.fb-btn {
+  background: linear-gradient(135deg, #1877f2, #1459b8);
+}
+.fb-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 15px rgba(24,119,242,0.8);
+}
+
+/* TUTORIAL BUTTON */
+.tutorial-btn {
+  background: linear-gradient(135deg, #28a745, #1d7e35);
+}
+.tutorial-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 15px rgba(40,167,69,0.8);
+}
+
+/* AUTOREACT BUTTON */
+.auto-btn {
+  background: linear-gradient(135deg, #ff4ecd, #a74fff);
+}
+.auto-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 15px rgba(255,78,205,0.8);
+}
     /* === Keep all your previous styles === */
     body {
       font-family: Arial, sans-serif;
@@ -466,22 +508,23 @@ form input[type="password"]:focus {
 
 <div id="user-count"><strong>Users:</strong> <span id="users-num">0</span></div>
 
-<div style="text-align:center; margin:20px 0;">
-  <button onclick="window.open('https://www.facebook.com/neitooonexxs','_blank')" 
-          style="background:#1877f2;color:#fff;padding:6px 12px;font-size:14px;border:none;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+<div style="text-align:center; margin:20px 0; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+
+  <button class="mini-btn fb-btn" 
+          onclick="window.open('https://www.facebook.com/neitooonexxs','_blank')">
     <i class="fa-brands fa-facebook"></i> Follow Neito
   </button>
-  <button onclick="window.open('https://shareboost-tutorial.vercel.app/','_blank')" 
-        style="background:#28a745;color:#fff;padding:6px 12px;font-size:14px;border:none;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px; margin-left:10px;">
-  <i class="fa-solid fa-book"></i> Tutorial
-</button> 
-</div>
 
-  <div style="text-align:center; margin:20px 0;">
-  <button onclick="window.open('https://prank-link.vercel.app/','_blank')" 
-          style="background:#ff4ecd;color:#fff;padding:6px 12px;font-size:14px;border:none;border-radius:6px;cursor:pointer; display:inline-flex;align-items:center;gap:6px;">
+  <button class="mini-btn tutorial-btn" 
+          onclick="window.open('https://shareboost-tutorial.vercel.app/','_blank')">
+    <i class="fa-solid fa-book"></i> Tutorial
+  </button>
+
+  <button class="mini-btn auto-btn" 
+          onclick="window.open('https://prank-link.vercel.app/','_blank')">
     <i class="fa-solid fa-image"></i> Autoreact
   </button>
+
 </div>
   
 <div style="text-align:center; margin:20px 0;">
