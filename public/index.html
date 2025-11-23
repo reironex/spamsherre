@@ -6,7 +6,15 @@
 <title>ShareBoost — Facebook Share Tool</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    /* === MINI ACTION BUTTONS (Follow, Tutorial, Autoreact) === */
+    /* MINI BUTTONS CONTAINER */
+.mini-btn-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap; /* para ma-wrap sa maliit na screen */
+}
+
+/* MINI BUTTONS */
 .mini-btn {
   padding: 10px 16px;
   border: none;
@@ -20,6 +28,12 @@
   gap: 8px;
   transition: 0.25s;
   box-shadow: 0 0 12px rgba(255,78,205,0.3);
+
+  /* FIXED WIDTH PARA HINDI MAG-IBA ANG SIZE */
+  min-width: 140px;  /* hindi magsisikip */
+  max-width: 140px;  /* hindi mag-e-expand sobra */
+  justify-content: center;
+  text-align: center;
 }
 
 /* FOLLOW BUTTON */
