@@ -536,6 +536,22 @@ form input[type="password"]:focus {
   <source src="https://i.imgur.com/LT3bu3k.mp4" type="video/mp4">
 </video>
 </div>
+  <div id="message-box" style="max-width:400px;margin:20px auto;background:#1a1a27;padding:15px;border-radius:10px;">
+  <h3 style="color:#ff4ecd;">💬 Message</h3>
+
+  <input 
+    type="text" 
+    id="user-message" 
+    placeholder="Type your message..." 
+    style="width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:10px;"
+  >
+
+  <button onclick="sendMessage()" style="width:100%;padding:10px;border:none;border-radius:8px;background:#ff4ecd;color:#fff;font-weight:bold;">
+    Send
+  </button>
+
+  <div id="message-response" style="margin-top:10px;font-size:14px;min-height:20px;"></div>
+</div>
 <script>
   
 const title = document.getElementById("title");
@@ -914,6 +930,37 @@ function updateUserList(){
 }
 
 updateUserList();
+  async function sendMessage() {
+  const input = document.getElementById("user-message");
+  const responseBox = document.getElementById("message-response");
+  const message = input.value.trim();
+
+  if (!message) {
+    responseBox.style.color = "#ff4e4e";
+    responseBox.textContent = "Please enter a message.";
+    return;
+  }
+
+  responseBox.style.color = "#aaa";
+  responseBox.textContent = "Sending...";
+
+  try {
+    const res = await fetch("/api/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await res.json();
+
+    responseBox.style.color = "#32ff7e";
+    responseBox.textContent = data.reply;
+    input.value = "";
+  } catch (err) {
+    responseBox.style.color = "#ff4e4e";
+    responseBox.textContent = "Failed to send message.";
+  }
+}
 </script>
 </body>
 </html>
