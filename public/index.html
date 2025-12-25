@@ -444,29 +444,6 @@ form input[type="password"]:focus {
   </style>
 </head>
 <body>
-  <!-- Admin Panel Toggle -->
-<div id="admin-toggle" style="position:fixed; top:10px; left:10px; z-index:1000; cursor:pointer; font-size:24px; color:#ff4ecd;">
-  <i class="fa-solid fa-bars"></i>
-</div>
-
-<!-- Admin Panel -->
-<div id="admin-panel" style="position:fixed; top:50px; left:10px; width:300px; background:#1a1a27; padding:20px; border-radius:10px; display:none; color:#fff; z-index:1000;">
-  <div id="admin-login">
-    <h4>Admin Login</h4>
-    <input type="text" id="admin-username" placeholder="Username">
-    <input type="password" id="admin-password" placeholder="Password">
-    <button onclick="adminLogin()">Login</button>
-    <div id="admin-feedback" style="margin-top:8px;"></div>
-  </div>
-
-  <div id="admin-message" style="display:none;">
-    <h4>Send Message</h4>
-    <input type="text" id="admin-msg-input" placeholder="Type message...">
-    <button onclick="sendAdminMessage()">Send</button>
-    <div id="admin-msg-feedback" style="margin-top:8px;"></div>
-  </div>
-</div>
-
   
 <div id="mode-toggle-container">
   <label class="switch">
@@ -937,98 +914,6 @@ function updateUserList(){
 }
 
 updateUserList();
-  const adminToggle = document.getElementById('admin-toggle');
-const adminPanel = document.getElementById('admin-panel');
-
-adminToggle.addEventListener('click', () => {
-  adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
-});
-  const adminFeedback = document.getElementById('admin-feedback');
-const adminMessageDiv = document.getElementById('admin-message');
-
-function adminLogin() {
-  const username = document.getElementById('admin-username').value;
-  const password = document.getElementById('admin-password').value;
-
-  // Only you can login
-  if(username === 'admin' && password === 'johnalpays') {
-    adminFeedback.textContent = 'Logged in!';
-    adminFeedback.style.color = 'lightgreen';
-    document.getElementById('admin-login').style.display = 'none';
-    adminMessageDiv.style.display = 'block';
-    localStorage.setItem('isAdmin', 'true');
-  } else {
-    adminFeedback.textContent = 'Invalid credentials';
-    adminFeedback.style.color = 'red';
-  }
-}
-
-// Auto-login if already logged in
-if(localStorage.getItem('isAdmin') === 'true') {
-  document.getElementById('admin-login').style.display = 'none';
-  adminMessageDiv.style.display = 'block';
-}
-  async function sendAdminMessage() {
-  const msgInput = document.getElementById('admin-msg-input');
-  const msg = msgInput.value.trim();
-  if(!msg) return;
-
-  const username = 'admin'; // same as sa server auth
-  const password = 'johnalpays'; // same password mo sa server
-
-  try {
-    const res = await fetch('http://localhost:3000/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password, message: msg })
-    });
-    const data = await res.json();
-    if(data.status === 'ok'){
-      document.getElementById('admin-msg-feedback').textContent = 'Message sent!';
-      msgInput.value = '';
-      showAdminMessages(); // refresh agad
-    } else {
-      document.getElementById('admin-msg-feedback').textContent = data.error || 'Error sending message';
-    }
-  } catch(e){
-    console.error(e);
-    document.getElementById('admin-msg-feedback').textContent = 'Server error';
-  }
-}
-
-// Display messages on top of page for all users
-async function showAdminMessages() {
-  try {
-    const res = await fetch('http://localhost:3000/messages'); // endpoint sa server
-    const updates = await res.json();
-
-    let container = document.getElementById('admin-notifications');
-    if(!container){
-      container = document.createElement('div');
-      container.id = 'admin-notifications';
-      container.style.position = 'fixed';
-      container.style.top = '60px';
-      container.style.left = '50%';
-      container.style.transform = 'translateX(-50%)';
-      container.style.background = '#ff4ecd';
-      container.style.color = '#fff';
-      container.style.padding = '10px 20px';
-      container.style.borderRadius = '12px';
-      container.style.zIndex = '999';
-      container.style.fontWeight = 'bold';
-      document.body.appendChild(container);
-    }
-
-    container.innerHTML = updates.map(u => u.message).join('<br>');
-  } catch(e){
-    console.error(e);
-  }
-}
-
-  document.getElementById('admin-notifications').innerHTML = updates.map(u => u.message).join('<br>');
-}
-
-setInterval(showAdminMessages, 1000); // live updates
 </script>
 </body>
 </html>
