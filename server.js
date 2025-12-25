@@ -1,46 +1,52 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const bodyParser = require("body-parser");
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import bodyParser from "body-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static("public"));
+// Middleware
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-// Store messages (in memory)
+// Store messages in memory
 let messages = [];
 
-// API for admin to send message
+// Admin sends message
 app.post("/admin/message", (req, res) => {
   const { message } = req.body;
-  if (!message) return res.status(400).json({ error: "Message required" });
+  if (!message) return res.status(400).json({ status: "error", error: "Message is required" });
 
-  const msgObj = { text: message, timestamp: Date.now() };
+  const msgObj = { text: message, time: Date.now() };
   messages.push(msgObj);
 
-  // Emit to all connected clients
+  // Broadcast to all clients
   io.emit("new-message", msgObj);
 
   res.json({ status: "ok" });
 });
 
-// Optional: get all messages
-app.get("/messages", (req, res) => res.json(messages));
-
-// Redirect root to index.html
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
+// Test route for clients
+app.get("/messages", (req, res) => {
+  res.json(messages);
 });
 
-// Socket.io connection
+// Socket.IO connection
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
-  // Optional: send last 5 messages
-  messages.slice(-5).forEach(msg => socket.emit("new-message", msg));
+  // Send previous messages
+  messages.forEach((msg) => socket.emit("new-message", msg));
+
+  socket.on("disconnect", () => console.log("User disconnected:", socket.id));
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
