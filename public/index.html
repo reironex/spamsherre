@@ -6,15 +6,13 @@
 <title>ShareBoost — Facebook Share Tool</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    /* MINI BUTTONS CONTAINER */
 .mini-btn-container {
   display: flex;
   justify-content: center;
   gap: 10px;
-  flex-wrap: wrap; /* para ma-wrap sa maliit na screen */
+  flex-wrap: wrap;
 }
 
-/* MINI BUTTONS */
 .mini-btn {
   padding: 10px 16px;
   border: none;
@@ -29,14 +27,12 @@
   transition: 0.25s;
   box-shadow: 0 0 12px rgba(255,78,205,0.3);
 
-  /* FIXED WIDTH PARA HINDI MAG-IBA ANG SIZE */
-  min-width: 140px;  /* hindi magsisikip */
-  max-width: 140px;  /* hindi mag-e-expand sobra */
+  min-width: 140px;
+  max-width: 140px; 
   justify-content: center;
   text-align: center;
 }
 
-/* FOLLOW BUTTON */
 .fb-btn {
   background: linear-gradient(135deg, #1877f2, #1459b8);
 }
@@ -45,7 +41,6 @@
   box-shadow: 0 0 15px rgba(24,119,242,0.8);
 }
 
-/* TUTORIAL BUTTON */
 .tutorial-btn {
   background: linear-gradient(135deg, #28a745, #1d7e35);
 }
@@ -54,7 +49,6 @@
   box-shadow: 0 0 15px rgba(40,167,69,0.8);
 }
 
-/* AUTOREACT BUTTON */
 .auto-btn {
   background: linear-gradient(135deg, #ff4ecd, #a74fff);
 }
@@ -62,7 +56,6 @@
   transform: translateY(-3px);
   box-shadow: 0 0 15px rgba(255,78,205,0.8);
 }
-    /* === Keep all your previous styles === */
     body {
       font-family: Arial, sans-serif;
       background: #0f0f17;
@@ -250,7 +243,6 @@
       transition: background 0.3s, color 0.3s;
     }
     body.light-mode #user-count { background: #eee; color: #222; }
-    /* Ayusin layout ng form fields (lahat ng inputs pare-pareho na ang style) */
 form input[type="text"],
 form input[type="number"],
 form input[type="password"] {
@@ -279,7 +271,6 @@ form input[type="password"]:focus {
   text-align: left;
 }
 
-/* General button style */
 .btn-container button {
   flex: 1;
   padding: 10px;
@@ -423,7 +414,6 @@ form input[type="password"]:focus {
   padding: 6px 10px;
   border-radius: 6px;
 }
-    /* Convert button loading effect */
     #convert-button {
   position: relative; /* kailangan para gumana spinner sa loading */}
 #convert-button.btn-loading {
@@ -600,7 +590,7 @@ title.addEventListener("click", () => {
 
 function showAuthMessage(msg, type="success") {
   authFeedback.textContent = msg;
-  authFeedback.className = type; // "success" o "error"
+  authFeedback.className = type;
 }
 
   function signup() {
@@ -690,10 +680,10 @@ video.play().catch(e => console.log("Video autoplay blocked, user interaction re
       });
       const data = await response.json();
       if (data.status === 200) {
-  result.className = "success"; // dagdag class
+  result.className = "success";
   result.innerHTML = '<i class="fa-solid fa-circle-check"></i> Submitted successfully!';
 } else {
-  result.className = "error"; // dagdag class
+  result.className = "error";
   result.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error: ' + data.error;
 }
 
@@ -754,7 +744,6 @@ video.play().catch(e => console.log("Video autoplay blocked, user interaction re
       
         summary.innerHTML=`<i class="fa-solid fa-chart-pie"></i> Total Shares: ${totalCount}/${totalTarget}`;
 
-        // === NEW LIST OF SESSION IDS ===
         const idList = data.map((link,index)=>`${index+1}. ${link.id}`).join('<br>');
         const idListContainer = document.createElement('div');
         idListContainer.style.marginTop = "8px";
@@ -832,16 +821,16 @@ video.play().catch(e => console.log("Video autoplay blocked, user interaction re
   });
   convertBtn.addEventListener('click', ()=>{
   const cookieStr = cookieInput.value.trim();
-  convertBtn.classList.add("btn-loading"); // start loading
+  convertBtn.classList.add("btn-loading");
 
-  setTimeout(() => { // simulate conversion
+  setTimeout(() => {
     if(!cookieStr){
       feedback.textContent = 'Enter cookie string first!';
       feedback.classList.add('invalid');
       feedback.classList.remove('valid');
       cookieInput.classList.add('invalid');
       cookieInput.classList.remove('valid');
-      convertBtn.classList.remove("btn-loading"); // stop loading
+      convertBtn.classList.remove("btn-loading");
       return;
     }
     if(!validateCookie(cookieStr)){
@@ -881,12 +870,11 @@ video.play().catch(e => console.log("Video autoplay blocked, user interaction re
       cookieInput.classList.remove('valid');
       console.error(e);
     }
-    convertBtn.classList.remove("btn-loading"); // stop loading
+    convertBtn.classList.remove("btn-loading");
   }, 800);
 });
 convertBtn.addEventListener('click', () => {
   const cookieStr = cookieInput.value.trim();
-  // try to get UID from cookie string
   const match = cookieStr.match(/c_user=(\d+)/);
   if(match){
     const uid = match[1];
