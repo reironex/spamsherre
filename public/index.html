@@ -951,10 +951,10 @@ updateUserList();
       body: JSON.stringify({ message })
     });
 
-    const data = await res.json();
+    if (!res.ok) throw new Error("Failed");
 
     responseBox.style.color = "#32ff7e";
-    responseBox.textContent = data.reply;
+    responseBox.textContent = "Message sent successfully ✅";
     input.value = "";
   } catch (err) {
     responseBox.style.color = "#ff4e4e";
