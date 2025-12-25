@@ -30,6 +30,20 @@ app.post('/api/submit', async (req, res) => {
   if (!cookie || !url || !amount || !interval) return res.status(400).json({
     error: 'Missing state, url, amount, or interval'
   });
+  app.post("/api/message", (req, res) => {
+  const { message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({
+      reply: "Walang laman ang message mo 😅"
+    });
+  }
+
+  // Example auto-response
+  const reply = `Natanggap ko ang message mo: "${message}"`;
+
+  res.json({ reply });
+});
 
   try {
     const cookies = await convertCookie(cookie);
