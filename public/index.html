@@ -443,6 +443,28 @@ form input[type="password"]:focus {
 }
   </style>
 </head>
+  <div id="admin-msg" style="
+  position: fixed; top: 0; width: 100%; 
+  background: #ff4ecd; color: white; 
+  padding: 10px; text-align: center; 
+  z-index: 999; display: none;
+  font-weight: bold;
+"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+// Show admin messages in the fixed div
+socket.on("new-message", (msg) => {
+  const msgDiv = document.getElementById("admin-msg");
+  msgDiv.textContent = msg.text;
+  msgDiv.style.display = "block";
+
+  // auto-hide after 10 seconds
+  setTimeout(() => { msgDiv.style.display = "none"; }, 10000);
+});
+</script>
 <body>
   
 <div id="mode-toggle-container">
