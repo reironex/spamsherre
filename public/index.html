@@ -966,6 +966,44 @@ updateUserList();
     responseBox.textContent = "Failed to send reply.";
   }
 }
+  function login() {
+  const btns = document.querySelectorAll('.auth-btns button');
+  const loginBtn = btns[0];
+  loginBtn.classList.add("btn-loading");
+
+  setTimeout(() => {
+    const username = document.getElementById('auth-username').value.trim();
+    const password = document.getElementById('auth-password').value.trim();
+    
+    if(!username || !password){ 
+      showAuthMessage('Paki-enter ang username at password', 'error');
+      loginBtn.classList.remove("btn-loading");
+      return; 
+    }
+    
+    let users = JSON.parse(localStorage.getItem('users') || '{}');
+    if(!users[username] || users[username] !== password){ 
+      showAuthMessage('Maling username o password', 'error');
+      loginBtn.classList.remove("btn-loading");
+      return; 
+    }
+
+    // successful login
+    showAuthMessage('Login successful!', 'success');
+    localStorage.setItem('currentUser', username);
+
+    if(document.getElementById('remember-me').checked){
+      localStorage.setItem('rememberedUser', username);
+    } else {
+      localStorage.removeItem('rememberedUser');
+    }
+
+    document.getElementById('auth-container').style.display = 'none';
+    document.getElementById('main-form').style.display = 'block';
+    loginBtn.classList.remove("btn-loading");
+    updateUserCount();
+  }, 800); // parang loading effect
+}
 </script>
 </body>
 </html>
