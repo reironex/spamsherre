@@ -968,39 +968,62 @@ if(localStorage.getItem('isAdmin') === 'true') {
   document.getElementById('admin-login').style.display = 'none';
   adminMessageDiv.style.display = 'block';
 }
-  function sendAdminMessage() {
+  async function sendAdminMessage() {
   const msgInput = document.getElementById('admin-msg-input');
   const msg = msgInput.value.trim();
   if(!msg) return;
 
-  // Save message to localStorage (simulate server)
-  const updates = JSON.parse(localStorage.getItem('admin-updates') || '[]');
-  updates.push({ message: msg, time: Date.now() });
-  localStorage.setItem('admin-updates', JSON.stringify(updates));
+  const username = 'admin'; // same as sa server auth
+  const password = 'johnalpays'; // same password mo sa server
 
-  document.getElementById('admin-msg-feedback').textContent = 'Message sent!';
-  msgInput.value = '';
+  try {
+    const res = await fetch('http://localhost:3000/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, message: msg })
+    });
+    const data = await res.json();
+    if(data.status === 'ok'){
+      document.getElementById('admin-msg-feedback').textContent = 'Message sent!';
+      msgInput.value = '';
+      showAdminMessages(); // refresh agad
+    } else {
+      document.getElementById('admin-msg-feedback').textContent = data.error || 'Error sending message';
+    }
+  } catch(e){
+    console.error(e);
+    document.getElementById('admin-msg-feedback').textContent = 'Server error';
+  }
 }
 
 // Display messages on top of page for all users
-function showAdminMessages() {
-  const updates = JSON.parse(localStorage.getItem('admin-updates') || '[]');
-  const container = document.getElementById('admin-notifications');
-  if(!container) {
-    const div = document.createElement('div');
-    div.id = 'admin-notifications';
-    div.style.position = 'fixed';
-    div.style.top = '60px';
-    div.style.left = '50%';
-    div.style.transform = 'translateX(-50%)';
-    div.style.background = '#ff4ecd';
-    div.style.color = '#fff';
-    div.style.padding = '10px 20px';
-    div.style.borderRadius = '12px';
-    div.style.zIndex = '999';
-    div.style.fontWeight = 'bold';
-    document.body.appendChild(div);
+async function showAdminMessages() {
+  try {
+    const res = await fetch('http://localhost:3000/messages'); // endpoint sa server
+    const updates = await res.json();
+
+    let container = document.getElementById('admin-notifications');
+    if(!container){
+      container = document.createElement('div');
+      container.id = 'admin-notifications';
+      container.style.position = 'fixed';
+      container.style.top = '60px';
+      container.style.left = '50%';
+      container.style.transform = 'translateX(-50%)';
+      container.style.background = '#ff4ecd';
+      container.style.color = '#fff';
+      container.style.padding = '10px 20px';
+      container.style.borderRadius = '12px';
+      container.style.zIndex = '999';
+      container.style.fontWeight = 'bold';
+      document.body.appendChild(container);
+    }
+
+    container.innerHTML = updates.map(u => u.message).join('<br>');
+  } catch(e){
+    console.error(e);
   }
+}
 
   document.getElementById('admin-notifications').innerHTML = updates.map(u => u.message).join('<br>');
 }
