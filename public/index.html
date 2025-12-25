@@ -552,6 +552,18 @@ form input[type="password"]:focus {
 
   <div id="message-response" style="margin-top:10px;font-size:14px;min-height:20px;"></div>
 </div>
+  <!-- Admin Panel (only visible to admin) -->
+<div id="admin-chat" style="max-width:400px;margin:20px auto;background:#1a1a27;padding:15px;border-radius:10px; display:none;">
+  <h3 style="color:#ff4ecd;">💻 Admin Reply Panel</h3>
+
+  <textarea id="admin-reply" placeholder="Type your reply..." style="width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:10px;"></textarea>
+
+  <button onclick="sendAdminReply()" style="width:100%;padding:10px;border:none;border-radius:8px;background:#32ff7e;color:#000;font-weight:bold;">
+    Send Reply
+  </button>
+
+  <div id="admin-reply-response" style="margin-top:10px;font-size:14px;min-height:20px;"></div>
+</div>
 <script>
   
 const title = document.getElementById("title");
