@@ -647,38 +647,6 @@ showAuthMessage('Account created! Please login', 'success');
 signupBtn.classList.remove("btn-loading");
   }, 1000); // simulate loading (1s)
 }
-
-function login() {
-  const btns = document.querySelectorAll('.auth-btns button');
-  const loginBtn = btns[0];
-  loginBtn.classList.add("btn-loading");
-
-  setTimeout(() => {
-    const username = document.getElementById('auth-username').value.trim();
-    const password = document.getElementById('auth-password').value.trim();
-    if(!username || !password){ 
-      showAuthMessage('Enter username & password', 'error');
-      loginBtn.classList.remove("btn-loading");
-      return; 
-    }
-    let users = JSON.parse(localStorage.getItem('users') || '{}');
-    if(users[username] && users[username] === password){
-      showAuthMessage('Login successful!', 'success');
-      localStorage.setItem('currentUser', username);
-      if(document.getElementById('remember-me').checked){
-        localStorage.setItem('rememberedUser', username);
-      } else {
-        localStorage.removeItem('rememberedUser');
-      }
-      authContainer.style.display = 'none';
-      mainForm.style.display = 'block';
-      updateUserCount();
-    } else{
-     showAuthMessage('Invalid credentials', 'error');
-    }
-    loginBtn.classList.remove("btn-loading");
-  }, 1000); // simulate loading (1s)
-}
   updateUserCount();
 
   let refreshInterval;
@@ -971,6 +939,31 @@ updateUserList();
   } catch (err) {
     responseBox.style.color = "#ff4e4e";
     responseBox.textContent = "Failed to send message.";
+  }
+}
+  async function sendAdminReply() {
+  const replyInput = document.getElementById('admin-reply');
+  const responseBox = document.getElementById('admin-reply-response');
+  const message = replyInput.value.trim();
+
+  if (!message) {
+    responseBox.style.color = "#ff4e4e";
+    responseBox.textContent = "Please enter a reply.";
+    return;
+  }
+
+  responseBox.style.color = "#aaa";
+  responseBox.textContent = "Sending...";
+
+  try {
+    console.log("📩 Admin reply:", message);
+
+    responseBox.style.color = "#32ff7e";
+    responseBox.textContent = "Reply sent ✅";
+    replyInput.value = "";
+  } catch (err) {
+    responseBox.style.color = "#ff4e4e";
+    responseBox.textContent = "Failed to send reply.";
   }
 }
 </script>
