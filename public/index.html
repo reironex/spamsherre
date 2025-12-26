@@ -514,6 +514,7 @@ form input[type="password"]:focus {
   <button onclick="sendAnnouncement()">Send</button>
   <div id="admin-feedback"></div>
 </div>
+  <div id="admin-replies" style="max-height:200px; overflow-y:auto; margin-top:10px; background:#2a2a3d; padding:5px; border-radius:6px; color:#fff;"></div>
 <div id="mode-toggle-container">
   <label class="switch">
     <input type="checkbox" id="mode-toggle">
@@ -1017,13 +1018,43 @@ menuBtn.onclick = () => {
   const data = await res.json();
 
   if (data.message) {
-    announceBar.innerHTML = "📢 " + data.message;
+    announceBar.innerHTML = `📢 ${data.message} <button onclick="replyAnnouncement()">Reply</button>`;
     announceBar.style.display = "block";
   }
 }
 
+function replyAnnouncement() {
+  const user = localStorage.getItem('currentUser') || "Guest";
+  const message = prompt("Type your reply:");
+  if (!message) return;
+  fetch("/api/reply", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      announcementId: "main", // pwede dynamic if multiple announcements
+      user,
+      message
+    })
+  }).then(res => res.json())
+    .then(data => alert(data.message || "Reply sent!"));
+}
 setInterval(loadAnnouncement, 3000);
 loadAnnouncement();
+  async function loadReplies() {
+  const res = await fetch(`/api/replies?username=${ADMIN_USER}&password=${ADMIN_PASS}`);
+  const data = await res.json();
+  const container = document.getElementById("admin-replies");
+  container.innerHTML = "";
+  for(const [annId, messages] of Object.entries(data)){
+    messages.forEach(m => {
+      const div = document.createElement("div");
+      div.textContent = `[${new Date(m.timestamp).toLocaleTimeString()}] ${m.user}: ${m.message}`;
+      container.appendChild(div);
+    });
+  }
+}
+
+setInterval(loadReplies, 2000);
 </script>
 </body>
 </html>
