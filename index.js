@@ -3,9 +3,36 @@ const axios = require('axios');
 const path = require('path');
 const bodyParser = require('body-parser');
 const app = express();
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "supersecret123"; // palitan mo
+let announcement = {
+  message: "",
+  updatedAt: null
+};
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/api/announcement', (req, res) => {
+  res.json(announcement);
+});
+app.post('/api/announcement', (req, res) => {
+  const { username, password, message } = req.body;
+
+  if (username !== ADMIN_USER || password !== ADMIN_PASS) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  if (!message || message.trim() === "") {
+    return res.status(400).json({ error: "Empty message" });
+  }
+
+  announcement = {
+    message,
+    updatedAt: Date.now()
+  };
+
+  res.json({ status: 200, message: "Announcement updated" });
+});
 
 const total = new Map();      // session info
 const timers = new Map();     // para sa mga interval timer
