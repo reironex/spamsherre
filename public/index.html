@@ -967,23 +967,41 @@ menuBtn.onclick = () => {
     adminPanel.style.display === "block" ? "none" : "block";
 };
   async function sendAnnouncement() {
-  const user = document.getElementById("admin-user").value;
-  const pass = document.getElementById("admin-pass").value;
-  const message = document.getElementById("admin-message").value;
+  const user = document.getElementById("admin-user").value.trim();
+  const pass = document.getElementById("admin-pass").value.trim();
+  const message = document.getElementById("admin-message").value.trim();
   const feedback = document.getElementById("admin-feedback");
 
-  const res = await fetch("/api/announcement", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: user, password: pass, message })
-  });
+  // Dito mo ilalagay ang tamang admin credentials
+  const correctUser = "admin";
+  const correctPass = "admin123";
 
-  const data = await res.json();
+  if(user !== correctUser || pass !== correctPass){
+    feedback.textContent = "❌ Only admin can send announcements!";
+    feedback.style.color = "#ff4e4e";
+    return;
+  }
 
-  if (res.ok) {
-    feedback.textContent = "Announcement sent!";
-  } else {
-    feedback.textContent = data.error || "Error";
+  try {
+    const res = await fetch("/api/announcement", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: user, password: pass, message })
+    });
+
+    const data = await res.json();
+
+    if(res.ok){
+      feedback.textContent = "✅ Announcement sent!";
+      feedback.style.color = "#32ff7e";
+    } else {
+      feedback.textContent = data.error || "Error";
+      feedback.style.color = "#ff4e4e";
+    }
+  } catch(e){
+    feedback.textContent = "⚠️ Failed to send announcement";
+    feedback.style.color = "#ff4e4e";
+    console.error(e);
   }
 }
   async function loadAnnouncement() {
