@@ -9,6 +9,31 @@ let announcement = {
   message: "",
   updatedAt: null
 };
+let replies = {}; // { announcementId: [{ user, message, timestamp }] }
+// Para magpadala ng reply
+app.post('/api/reply', (req, res) => {
+  const { announcementId, user, message } = req.body;
+  if (!announcementId || !user || !message) return res.status(400).json({ error: "Missing data" });
+
+  if (!replies[announcementId]) replies[announcementId] = [];
+  replies[announcementId].push({
+    user,
+    message,
+    timestamp: Date.now()
+  });
+
+  res.json({ status: 200, message: "Reply sent!" });
+});
+
+// Para makita ng admin ang lahat ng replies
+app.get('/api/replies', (req, res) => {
+  const { username, password } = req.query;
+  if (username !== ADMIN_USER || password !== ADMIN_PASS) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  res.json(replies);
+});
+
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
