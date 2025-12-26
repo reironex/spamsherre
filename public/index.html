@@ -454,12 +454,38 @@ form input[type="password"]:focus {
   position: fixed;
   top: 50px;
   left: 10px;
-  width: 260px;
+  width: 300px; /* palakihin para mas kasya */
   background: #1a1a27;
-  padding: 12px;
+  padding: 15px; /* dagdagan kaunti ang padding */
   border-radius: 10px;
   display: none;
   z-index: 1000;
+}
+
+#admin-panel textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical; /* vertical lang ang puwedeng i-resize */
+}
+
+#admin-panel input,
+#admin-panel textarea,
+#admin-panel button {
+  width: 100%;           /* full width ng panel */
+  box-sizing: border-box; /* kasama sa width ang padding at border */
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #2a2a3d;
+  color: #eee;
+}
+
+#admin-panel button {
+  background: linear-gradient(135deg, #ff4ecd, #a74fff);
+  color: #fff;
+  border: none;
+  cursor: pointer;
 }
 
 #admin-panel textarea {
