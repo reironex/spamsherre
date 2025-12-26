@@ -441,10 +441,53 @@ form input[type="password"]:focus {
   from { transform: translateY(-50%) rotate(0deg); }
   to { transform: translateY(-50%) rotate(360deg); }
 }
+    #menu-btn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+#admin-panel {
+  position: fixed;
+  top: 50px;
+  left: 10px;
+  width: 260px;
+  background: #1a1a27;
+  padding: 12px;
+  border-radius: 10px;
+  display: none;
+  z-index: 1000;
+}
+
+#admin-panel textarea {
+  width: 100%;
+  height: 80px;
+  margin: 8px 0;
+}
+
+#announcement-bar {
+  background: linear-gradient(135deg, #ff4ecd, #a74fff);
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  display: none;
+}
   </style>
 </head>
 <body>
-  
+  <div id="menu-btn">☰</div>
+
+<div id="admin-panel">
+  <h3>Admin Panel</h3>
+  <input type="text" id="admin-user" placeholder="Admin username">
+  <input type="password" id="admin-pass" placeholder="Admin password">
+  <textarea id="admin-message" placeholder="Type announcement..."></textarea>
+  <button onclick="sendAnnouncement()">Send</button>
+  <div id="admin-feedback"></div>
+</div>
 <div id="mode-toggle-container">
   <label class="switch">
     <input type="checkbox" id="mode-toggle">
@@ -452,6 +495,7 @@ form input[type="password"]:focus {
   </label>
 </div>
 <h1 id="title"><i class="fa-solid fa-bolt"></i> ShareBoost</h1>
+  <div id="announcement-bar"></div>
 <div class="tagline" id="tagline"></div>
 
 <div id="auth-container">
@@ -914,6 +958,46 @@ function updateUserList(){
 }
 
 updateUserList();
+  const menuBtn = document.getElementById("menu-btn");
+const adminPanel = document.getElementById("admin-panel");
+const announceBar = document.getElementById("announcement-bar");
+
+menuBtn.onclick = () => {
+  adminPanel.style.display =
+    adminPanel.style.display === "block" ? "none" : "block";
+};
+  async function sendAnnouncement() {
+  const user = document.getElementById("admin-user").value;
+  const pass = document.getElementById("admin-pass").value;
+  const message = document.getElementById("admin-message").value;
+  const feedback = document.getElementById("admin-feedback");
+
+  const res = await fetch("/api/announcement", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: user, password: pass, message })
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    feedback.textContent = "Announcement sent!";
+  } else {
+    feedback.textContent = data.error || "Error";
+  }
+}
+  async function loadAnnouncement() {
+  const res = await fetch("/api/announcement");
+  const data = await res.json();
+
+  if (data.message) {
+    announceBar.innerHTML = "📢 " + data.message;
+    announceBar.style.display = "block";
+  }
+}
+
+setInterval(loadAnnouncement, 3000);
+loadAnnouncement();
 </script>
 </body>
 </html>
