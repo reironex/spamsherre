@@ -449,19 +449,23 @@ form input[type="password"]:focus {
   cursor: pointer;
   z-index: 1000;
 }
-
 #admin-panel {
   position: fixed;
-  top: 50px;
-  left: 10px;
-  width: 300px; /* palakihin para mas kasya */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 400px;              /* same size vibe as create account */
+  max-width: 90%;
+
   background: #1a1a27;
-  padding: 15px; /* dagdagan kaunti ang padding */
-  border-radius: 10px;
+  padding: 25px;
+  border-radius: 14px;
+
+  box-shadow: 0 0 25px rgba(255,78,205,0.4);
   display: none;
   z-index: 1000;
 }
-
 #admin-panel textarea {
   width: 100%;
   min-height: 80px;
@@ -501,17 +505,42 @@ form input[type="password"]:focus {
   font-weight: bold;
   display: none;
 }
+    #admin-panel h3 {
+  margin-top: 0;
+  color: #ff4ecd;
+  text-align: center;
+}
+
+#admin-panel button {
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+#admin-panel button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(255,78,205,0.6);
+}
   </style>
 </head>
 <body>
   <div id="menu-btn">☰</div>
 
 <div id="admin-panel">
-  <h3>Admin Panel</h3>
-  <input type="text" id="admin-user" placeholder="Admin username">
-  <input type="password" id="admin-pass" placeholder="Admin password">
-  <textarea id="admin-message" placeholder="Type announcement..."></textarea>
-  <button onclick="sendAnnouncement()">Send</button>
+  <h3 id="admin-title">🔐 Admin Login</h3>
+
+  <!-- LOGIN -->
+  <div id="admin-login">
+    <input type="text" id="admin-user" placeholder="Admin username">
+    <input type="password" id="admin-pass" placeholder="Admin password">
+    <button onclick="adminLogin()">Login</button>
+  </div>
+
+  <!-- ANNOUNCEMENT (hidden muna) -->
+  <div id="admin-announcement" style="display:none;">
+    <textarea id="admin-message" placeholder="📢 Type announcement here..."></textarea>
+    <button onclick="sendAnnouncement()">Send Announcement</button>
+  </div>
+
   <div id="admin-feedback"></div>
 </div>
 <div id="mode-toggle-container">
@@ -984,19 +1013,84 @@ function updateUserList(){
 }
 
 updateUserList();
-  const menuBtn = document.getElementById("menu-btn");
+const menuBtn = document.getElementById("menu-btn");
 const adminPanel = document.getElementById("admin-panel");
 const announceBar = document.getElementById("announcement-bar");
+// ✅ I-restore admin login status at credentials mula sa localStorage
+let adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
+
+let adminCredentials = null;
+
+if (adminLoggedIn) {
+  const storedUser = localStorage.getItem("adminUser");
+  const storedPass = localStorage.getItem("adminPass");
+
+  if (storedUser && storedPass) {
+    adminCredentials = { username: storedUser, password: storedPass };
+
+    document.getElementById("admin-login").style.display = "none";
+    document.getElementById("admin-announcement").style.display = "block";
+    document.getElementById("admin-title").textContent = "📢 Announcement Panel";
+  } else {
+    // Kung wala credentials, reset login status
+    localStorage.removeItem("adminLoggedIn");
+    adminLoggedIn = false;
+  }
+}
+  
+async function adminLogin() {
+  const user = document.getElementById("admin-user").value;
+  const pass = document.getElementById("admin-pass").value;
+  const feedback = document.getElementById("admin-feedback");
+
+  const res = await fetch("/api/announcement", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: user, password: pass, message: "__login_test__" })
+  });
+
+  if (res.status === 401) {
+    feedback.textContent = "❌ Invalid admin credentials";
+    feedback.style.color = "#ff4e4e";
+    return;
+  }
+
+  adminLoggedIn = true;
+  localStorage.setItem("adminLoggedIn", "true");
+  localStorage.setItem("adminUser", user);
+  localStorage.setItem("adminPass", pass);
+  
+  adminCredentials = { username: user, password: pass };
+
+  feedback.textContent = "✅ Admin authenticated";
+  feedback.style.color = "#32ff7e";
+
+  document.getElementById("admin-login").style.display = "none";
+  document.getElementById("admin-announcement").style.display = "block";
+  document.getElementById("admin-title").textContent = "📢 Announcement Panel";
+}
 
 menuBtn.onclick = () => {
   adminPanel.style.display =
     adminPanel.style.display === "block" ? "none" : "block";
 };
   async function sendAnnouncement() {
-  const user = document.getElementById("admin-user").value;
-  const pass = document.getElementById("admin-pass").value;
+  if (!adminLoggedIn || !adminCredentials) {
+    const feedback = document.getElementById("admin-feedback");
+    feedback.textContent = "❌ Admin credentials missing. Please login again.";
+    feedback.style.color = "#ff4e4e";
+    return;
+  }
+
+  const { username: user, password: pass } = adminCredentials;
   const message = document.getElementById("admin-message").value;
   const feedback = document.getElementById("admin-feedback");
+
+  if (!message.trim()) {
+    feedback.textContent = "⚠️ Message cannot be empty";
+    feedback.style.color = "#ff4e4e";
+    return;
+  }
 
   const res = await fetch("/api/announcement", {
     method: "POST",
@@ -1007,9 +1101,12 @@ menuBtn.onclick = () => {
   const data = await res.json();
 
   if (res.ok) {
-    feedback.textContent = "Announcement sent!";
+    feedback.textContent = "✅ Announcement sent successfully!";
+    feedback.style.color = "#32ff7e";
+    document.getElementById("admin-message").value = "";
   } else {
     feedback.textContent = data.error || "Error";
+    feedback.style.color = "#ff4e4e";
   }
 }
   async function loadAnnouncement() {
