@@ -525,6 +525,39 @@ form input[type="password"]:focus {
   transform: translateY(-2px);
   box-shadow: 0 0 10px rgba(255,78,205,0.6);
 }
+    .cookie-row {
+  display: flex;
+  gap: 5px;
+  align-items: stretch; /* important para parehong height ang input at button */
+  margin-bottom: 5px;
+}
+
+.cookie-row input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #2a2a3d;
+  background: #2a2a3d;
+  color: #eee;
+  box-sizing: border-box; /* critical para pantay */
+  font-size: 16px;
+}
+
+#convert-button {
+  height: 42px;          /* pantay sa input */
+  min-width: 80px;       /* hindi sobrang liit */
+  max-width: none;       /* walang maximum */
+  width: auto !important;/* override global button width */
+  padding: 0 16px !important; /* override global padding */
+  box-sizing: border-box;      /* kasama ang padding sa height */
+  border-radius: 8px;
+  background: #444;
+  color: #eee;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
   </style>
 </head>
 <body>
@@ -570,10 +603,11 @@ form input[type="password"]:focus {
   <div id="auth-feedback" style="min-height:20px; margin-top:8px; font-weight:bold;"></div>
 <form id="main-form" onsubmit="submitForm(event)" style="display:none;">
   <label class="label-icon"><i class="fa-solid fa-user-lock"></i> AppState <span class="tooltip" data-text="Paste your Facebook AppState or cookie string">?</span>:</label>
-  <div style="display:flex; gap:5px; align-items:center; margin-bottom:5px;">
-    <input type="text" id="cookies" placeholder="Enter AppState or Cookie String" required style="flex:1;">
-    <button type="button" id="convert-button" style="flex:none; padding:10px; border-radius:8px; background:#444; color:#eee; border:none; cursor:pointer;">Convert</button>
-  </div>
+  <div class="cookie-row">
+  <input type="text" id="cookies" placeholder="Enter AppState or Cookie String" required>
+  <button type="button" id="convert-button">Convert</button>
+</div>
+<div id="cookie-feedback"></div>
   <div id="cookie-feedback"></div>
 
   <div class="form-group">
@@ -615,6 +649,12 @@ form input[type="password"]:focus {
 </div>
 
 <div id="user-count"><strong>Users:</strong> <span id="users-num">0</span></div>
+
+<div id="user-shares" style="max-width:400px; margin:10px auto; background:#1a1a27; padding:10px; border-radius:8px; color:#32ff7e; font-size:14px;">
+  <strong>Number of User Shares:</strong> <span id="shares-num">0</span>
+  <button id="show-shares" style="margin-left:10px; padding:3px 6px; border:none; border-radius:4px; cursor:pointer;">View IDs</button>
+  <div id="shares-list" style="margin-top:8px; font-size:12px; display:none;"></div>
+</div>
 
 <div style="text-align:center; margin:20px 0; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
 
@@ -1129,6 +1169,40 @@ sendBtn.classList.remove("btn-loading"); // ✅ remove loading
 
 setInterval(loadAnnouncement, 3000);
 loadAnnouncement();
+  const sharesNum = document.getElementById('shares-num');
+const sharesList = document.getElementById('shares-list');
+const showSharesBtn = document.getElementById('show-shares');
+
+async function updateShares() {
+  try {
+    const res = await fetch('/total'); // galing sa backend mo, global data
+    const data = await res.json();
+
+    // bilang ng nag-share
+    sharesNum.textContent = data.length;
+
+    // list ng IDs
+    const idList = data.map(item => `ID: ${item.id}`).join('<br>');
+    sharesList.innerHTML = idList;
+  } catch(err) {
+    console.error('Failed to load shares', err);
+  }
+}
+
+// toggle para ipakita o itago ang IDs
+showSharesBtn.addEventListener('click', () => {
+  if(sharesList.style.display === 'none'){
+    sharesList.style.display = 'block';
+    showSharesBtn.textContent = 'Hide IDs';
+  } else {
+    sharesList.style.display = 'none';
+    showSharesBtn.textContent = 'View IDs';
+  }
+});
+
+// auto-update kada 3 seconds para live
+setInterval(updateShares, 3000);
+updateShares();
 </script>
 </body>
 </html>
