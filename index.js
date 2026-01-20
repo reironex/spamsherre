@@ -33,19 +33,23 @@ app.post('/api/announcement', (req, res) => {
 
   res.json({ status: 200, message: "Announcement updated" });
 });
-
+const allShares = []; // 👈 NEW: permanent history
 const total = new Map();      // session info
 const timers = new Map();     // para sa mga interval timer
-
 app.get('/total', (req, res) => {
   const data = Array.from(total.values()).map((link, index)  => ({
-    session: index + 1,
-    url: link.url,
-    count: link.count,
-    id: link.id,
-    target: link.target,
-  }));
+  session: index + 1,
+  url: link.url,
+  id: link.id,
+  label: link.label,
+  count: link.count,
+  target: link.target,
+  startTime: link.startTime
+}));
   res.json(JSON.parse(JSON.stringify(data || [], null, 2)));
+});
+app.get('/shares', (req, res) => {
+  res.json(allShares);
 });
 
 app.get('/', (res) => {
@@ -53,7 +57,7 @@ app.get('/', (res) => {
 });
 
 app.post('/api/submit', async (req, res) => {
-  const { cookie, url, amount, interval } = req.body;
+  const { cookie, url, amount, interval, label } = req.body;
   if (!cookie || !url || !amount || !interval) return res.status(400).json({
     error: 'Missing state, url, amount, or interval'
   });
@@ -63,7 +67,12 @@ app.post('/api/submit', async (req, res) => {
     if (!cookies) {
       return res.status(400).json({ status: 500, error: 'Invalid cookies' });
     };
-    const id = await share(cookies, url, amount, interval);
+    const id = await share(cookies, url, amount, interval, label);
+    allShares.push({
+  id,
+  url,
+  time: Date.now()
+});
     res.status(200).json({ status: 200, id });
   } catch (err) {
     return res.status(500).json({ status: 500, error: err.message || err });
@@ -93,13 +102,18 @@ app.post('/api/stop', (req, res) => {
   return res.json({ status: 200, message: 'Lahat ng sessions tinigil na' });
 });
 
-async function share(cookies, url, amount, interval) {
+async function share(cookies, url, amount, interval, label) {
   const id = await getPostID(url);
   const accessToken = await getAccessToken(cookies);
   if (!id) throw new Error("Unable to get link id: invalid URL, it's either a private post or visible to friends only");
-
-  total.set(id, { url, id, count: 0, target: amount });
-
+  total.set(id, {
+  url,
+  id,
+  label,
+  count: 0,
+  target: amount,
+  startTime: Date.now()
+});
   const headers = {
     'accept': '*/*',
     'accept-encoding': 'gzip, deflate',
@@ -118,9 +132,9 @@ async function share(cookies, url, amount, interval) {
         { headers }
       );
       if (response.status === 200) {
-        total.set(id, { ...total.get(id), count: total.get(id).count + 1 });
-        sharedCount++;
-      }
+  total.set(id, { ...total.get(id), count: total.get(id).count + 1 });
+  sharedCount++;
+}
       if (sharedCount === amount) {
         clearInterval(timers.get(id));
         timers.delete(id);
