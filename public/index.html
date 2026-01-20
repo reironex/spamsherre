@@ -377,7 +377,7 @@ form input[type="password"]:focus {
 }
     .btn-loading {
   position: relative;
-  pointer-events: none; /* para hindi ulit ma-click */
+  pointer-events: none; 
   opacity: 0.7;
 }
 
@@ -415,11 +415,11 @@ form input[type="password"]:focus {
   border-radius: 6px;
 }
     #convert-button {
-  position: relative; /* kailangan para gumana spinner sa loading */}
+  position: relative; }
 #convert-button.btn-loading {
   background: linear-gradient(135deg, #32ff7e, #ff4ecd);
   color: #fff;
-  pointer-events: none; /* disable clicks habang loading */
+  pointer-events: none;
   opacity: 0.7;
 }
 
@@ -453,35 +453,35 @@ form input[type="password"]:focus {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -60%); /* start slightly above */
+  transform: translate(-50%, -60%);
   width: 400px;
-  max-width: calc(100% - 40px); /* 20px space sa left at right */
+  max-width: calc(100% - 40px); /* 20pright 
   background: #1a1a27;
   padding: 25px;
   border-radius: 14px;
   box-shadow: 0 0 25px rgba(255,78,205,0.4);
-  opacity: 0;          /* hidden by default */
-  pointer-events: none; /* can't click while hidden */
-  transition: opacity 0.4s ease, transform 0.4s ease; /* smooth fade+slide */
+  opacity: 0;          
+  pointer-events: none; 
+  transition: opacity 0.4s ease, transform 0.4s ease;
   z-index: 1000;
 }
 
 #admin-panel.show {
-  opacity: 1;             /* visible */
-  transform: translate(-50%, -50%); /* slide to center */
-  pointer-events: auto;   /* allow clicks */
+  opacity: 1;            
+  transform: translate(-50%, -50%); 
+  pointer-events: auto;   
 }
 #admin-panel textarea {
   width: 100%;
   min-height: 80px;
-  resize: vertical; /* vertical lang ang puwedeng i-resize */
+  resize: vertical; 
 }
 
 #admin-panel input,
 #admin-panel textarea,
 #admin-panel button {
-  width: 100%;           /* full width ng panel */
-  box-sizing: border-box; /* kasama sa width ang padding at border */
+  width: 100%;          
+  box-sizing: border-box;
   margin-bottom: 8px;
   padding: 8px 10px;
   border-radius: 8px;
@@ -528,7 +528,7 @@ form input[type="password"]:focus {
     .cookie-row {
   display: flex;
   gap: 5px;
-  align-items: stretch; /* important para parehong height ang input at button */
+  align-items: stretch; 
   margin-bottom: 5px;
 }
 
@@ -539,17 +539,17 @@ form input[type="password"]:focus {
   border: 2px solid #2a2a3d;
   background: #2a2a3d;
   color: #eee;
-  box-sizing: border-box; /* critical para pantay */
+  box-sizing: border-box;
   font-size: 16px;
 }
 
 #convert-button {
-  height: 42px;          /* pantay sa input */
-  min-width: 80px;       /* hindi sobrang liit */
-  max-width: none;       /* walang maximum */
-  width: auto !important;/* override global button width */
-  padding: 0 16px !important; /* override global padding */
-  box-sizing: border-box;      /* kasama ang padding sa height */
+  height: 42px;        
+  min-width: 80px;       
+  max-width: none;      
+  width: auto !important;
+  padding: 0 16px !important;
+  box-sizing: border-box; 
   border-radius: 8px;
   background: #444;
   color: #eee;
@@ -777,7 +777,7 @@ users[username] = password;
 localStorage.setItem('users', JSON.stringify(users));
 showAuthMessage('Account created! Please login', 'success');
 signupBtn.classList.remove("btn-loading");
-  }, 1000); // simulate loading (1s)
+  }, 1000);
 }
 
 function login() {
@@ -809,7 +809,7 @@ function login() {
      showAuthMessage('Invalid credentials', 'error');
     }
     loginBtn.classList.remove("btn-loading");
-  }, 1000); // simulate loading (1s)
+  }, 1000);
 }
   updateUserCount();
 
@@ -1004,7 +1004,7 @@ liveTimers.push(timeSpan);
       feedback.classList.remove('valid');
       cookieInput.classList.add('invalid');
       cookieInput.classList.remove('valid');
-      convertBtn.classList.remove("btn-loading"); // stop loading
+      convertBtn.classList.remove("btn-loading");
       return;
     }
     try{
@@ -1082,7 +1082,6 @@ updateUserList();
 const menuBtn = document.getElementById("menu-btn");
 const adminPanel = document.getElementById("admin-panel");
 const announceBar = document.getElementById("announcement-bar");
-// ✅ I-restore admin login status at credentials mula sa localStorage
 let adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
 
 let adminCredentials = null;
@@ -1098,7 +1097,6 @@ if (adminLoggedIn) {
     document.getElementById("admin-announcement").style.display = "block";
     document.getElementById("admin-title").textContent = "📢 Announcement Panel";
   } else {
-    // Kung wala credentials, reset login status
     localStorage.removeItem("adminLoggedIn");
     adminLoggedIn = false;
   }
@@ -1158,7 +1156,7 @@ menuBtn.onclick = () => {
   }
 
   const sendBtn = document.querySelector("#admin-announcement button");
-sendBtn.classList.add("btn-loading"); // ✅ add loading
+sendBtn.classList.add("btn-loading");
 
 const res = await fetch("/api/announcement", {
   method: "POST",
@@ -1166,7 +1164,7 @@ const res = await fetch("/api/announcement", {
   body: JSON.stringify({ username: user, password: pass, message })
 });
 
-sendBtn.classList.remove("btn-loading"); // ✅ remove loading
+sendBtn.classList.remove("btn-loading");
   
     const data = await res.json();
   if (res.ok) {
@@ -1199,10 +1197,7 @@ async function updateShares() {
     const res = await fetch('/shares');
     const data = await res.json();
 
-    // ✅ total shares = lahat ng entries
     sharesNum.textContent = data.length;
-
-    // ✅ ipakita lahat ng IDs kahit pare-pareho
     sharesList.innerHTML = data
       .map((item, i) => `${i + 1}. ID: ${item.id}`)
       .join('<br>');
@@ -1211,7 +1206,6 @@ async function updateShares() {
   }
 }
 
-// toggle para ipakita o itago ang IDs
 showSharesBtn.addEventListener('click', () => {
   if(sharesList.style.display === 'none'){
     sharesList.style.display = 'block';
@@ -1222,7 +1216,6 @@ showSharesBtn.addEventListener('click', () => {
   }
 });
 
-// auto-update kada 3 seconds para live
 setInterval(updateShares, 3000);
 updateShares();
 </script>
