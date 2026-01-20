@@ -1196,16 +1196,17 @@ const showSharesBtn = document.getElementById('show-shares');
 
 async function updateShares() {
   try {
-    const res = await fetch('/total'); // galing sa backend mo, global data
+    const res = await fetch('/shares');
     const data = await res.json();
 
-    // bilang ng nag-share
+    // ✅ total shares = lahat ng entries
     sharesNum.textContent = data.length;
 
-    // list ng IDs
-    const idList = data.map(item => `ID: ${item.id}`).join('<br>');
-    sharesList.innerHTML = idList;
-  } catch(err) {
+    // ✅ ipakita lahat ng IDs kahit pare-pareho
+    sharesList.innerHTML = data
+      .map((item, i) => `${i + 1}. ID: ${item.id}`)
+      .join('<br>');
+  } catch (err) {
     console.error('Failed to load shares', err);
   }
 }
