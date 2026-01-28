@@ -2,7 +2,18 @@ const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const bodyParser = require('body-parser');
+const fs = require('fs');
 const app = express();
+const DATA_FILE = path.join(__dirname, 'data', 'shares.json');
+
+function readShares() {
+  if (!fs.existsSync(DATA_FILE)) return [];
+  return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+}
+
+function saveShares(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
 const ADMIN_USER = "admin";
 const ADMIN_PASS = "supersecret123"; // palitan mo
 let announcement = {
@@ -33,7 +44,7 @@ app.post('/api/announcement', (req, res) => {
 
   res.json({ status: 200, message: "Announcement updated" });
 });
-const allShares = []; // 👈 NEW: permanent history
+let allShares = readShares();
 const total = new Map();      // session info
 const timers = new Map();     // para sa mga interval timer
 app.get('/total', (req, res) => {
@@ -49,7 +60,7 @@ app.get('/total', (req, res) => {
   res.json(JSON.parse(JSON.stringify(data || [], null, 2)));
 });
 app.get('/shares', (req, res) => {
-  res.json(allShares);
+  res.json(readShares());
 });
 
 app.get('/', (res) => {
@@ -73,6 +84,8 @@ app.post('/api/submit', async (req, res) => {
   url,
   time: Date.now()
 });
+
+    saveShares(allShares);
     res.status(200).json({ status: 200, id });
   } catch (err) {
     return res.status(500).json({ status: 500, error: err.message || err });
