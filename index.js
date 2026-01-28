@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const bodyParser = require('body-parser');
-const fs = require('fs'); // (hindi tinanggal, kahit di na kailangan)
+const fs = require('fs'); // hindi tinanggal
 const mongoose = require('mongoose');
 
 const app = express();
@@ -13,6 +13,14 @@ const app = express();
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
+});
+
+mongoose.connection.once('open', () => {
+  console.log('✅ MongoDB connected');
+});
+
+mongoose.connection.on('error', err => {
+  console.error('❌ MongoDB error:', err);
 });
 
 const ShareSchema = new mongoose.Schema({
@@ -34,6 +42,9 @@ let announcement = {
   updatedAt: null
 };
 
+/* =======================
+   MIDDLEWARE
+======================= */
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -65,7 +76,7 @@ app.post('/api/announcement', (req, res) => {
 });
 
 /* =======================
-   SESSION MAPS (DI TINANGGAL)
+   SESSION MAPS (DI INALIS)
 ======================= */
 const total = new Map();
 const timers = new Map();
@@ -88,7 +99,7 @@ app.get('/total', (req, res) => {
 });
 
 /* =======================
-   SHARES API (FROM DB)
+   SHARES API (PERSISTENT)
 ======================= */
 app.get('/shares', async (req, res) => {
   const shares = await Share.find({}).sort({ time: 1 });
@@ -107,6 +118,7 @@ app.get('/', (req, res) => {
 ======================= */
 app.post('/api/submit', async (req, res) => {
   const { cookie, url, amount, interval, label } = req.body;
+
   if (!cookie || !url || !amount || !interval) {
     return res.status(400).json({
       error: 'Missing state, url, amount, or interval'
@@ -121,7 +133,7 @@ app.post('/api/submit', async (req, res) => {
 
     const id = await share(cookies, url, amount, interval, label);
 
-    // ✅ SAVE TO MONGODB (PERSISTENT)
+    // ✅ SAVE TO DB (HINDI NA NABUBURA)
     await Share.create({
       id,
       url,
@@ -165,6 +177,7 @@ app.post('/api/stop', (req, res) => {
 async function share(cookies, url, amount, interval, label) {
   const id = await getPostID(url);
   const accessToken = await getAccessToken(cookies);
+
   if (!id) throw new Error("Unable to get link id");
 
   total.set(id, {
@@ -282,5 +295,5 @@ async function convertCookie(cookie) {
    SERVER
 ======================= */
 app.listen(5000, () => {
-  console.log("Server running on port 5000");
+  console.log('🚀 Server running on port 5000');
 });
