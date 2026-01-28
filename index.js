@@ -2,30 +2,49 @@ const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const bodyParser = require('body-parser');
-const fs = require('fs');
+const fs = require('fs'); // (hindi tinanggal, kahit di na kailangan)
+const mongoose = require('mongoose');
+
 const app = express();
-const DATA_FILE = path.join(__dirname, 'data', 'shares.json');
 
-function readShares() {
-  if (!fs.existsSync(DATA_FILE)) return [];
-  return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-}
+/* =======================
+   MONGODB SETUP
+======================= */
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
-function saveShares(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
+const ShareSchema = new mongoose.Schema({
+  id: String,
+  url: String,
+  time: Number
+});
+
+const Share = mongoose.model('Share', ShareSchema);
+
+/* =======================
+   ADMIN CONFIG
+======================= */
 const ADMIN_USER = "admin";
-const ADMIN_PASS = "supersecret123"; // palitan mo
+const ADMIN_PASS = "supersecret123";
+
 let announcement = {
   message: "",
   updatedAt: null
 };
+
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+/* =======================
+   ANNOUNCEMENT API
+======================= */
 app.get('/api/announcement', (req, res) => {
   res.json(announcement);
 });
+
 app.post('/api/announcement', (req, res) => {
   const { username, password, message } = req.body;
 
@@ -44,55 +63,80 @@ app.post('/api/announcement', (req, res) => {
 
   res.json({ status: 200, message: "Announcement updated" });
 });
-let allShares = readShares();
-const total = new Map();      // session info
-const timers = new Map();     // para sa mga interval timer
+
+/* =======================
+   SESSION MAPS (DI TINANGGAL)
+======================= */
+const total = new Map();
+const timers = new Map();
+
+/* =======================
+   TOTAL API
+======================= */
 app.get('/total', (req, res) => {
-  const data = Array.from(total.values()).map((link, index)  => ({
-  session: index + 1,
-  url: link.url,
-  id: link.id,
-  label: link.label,
-  count: link.count,
-  target: link.target,
-  startTime: link.startTime
-}));
+  const data = Array.from(total.values()).map((link, index) => ({
+    session: index + 1,
+    url: link.url,
+    id: link.id,
+    label: link.label,
+    count: link.count,
+    target: link.target,
+    startTime: link.startTime
+  }));
+
   res.json(JSON.parse(JSON.stringify(data || [], null, 2)));
 });
-app.get('/shares', (req, res) => {
-  res.json(readShares());
+
+/* =======================
+   SHARES API (FROM DB)
+======================= */
+app.get('/shares', async (req, res) => {
+  const shares = await Share.find({}).sort({ time: 1 });
+  res.json(shares);
 });
 
-app.get('/', (res) => {
+/* =======================
+   HOME
+======================= */
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+/* =======================
+   SUBMIT API
+======================= */
 app.post('/api/submit', async (req, res) => {
   const { cookie, url, amount, interval, label } = req.body;
-  if (!cookie || !url || !amount || !interval) return res.status(400).json({
-    error: 'Missing state, url, amount, or interval'
-  });
+  if (!cookie || !url || !amount || !interval) {
+    return res.status(400).json({
+      error: 'Missing state, url, amount, or interval'
+    });
+  }
 
   try {
     const cookies = await convertCookie(cookie);
     if (!cookies) {
       return res.status(400).json({ status: 500, error: 'Invalid cookies' });
-    };
-    const id = await share(cookies, url, amount, interval, label);
-    allShares.push({
-  id,
-  url,
-  time: Date.now()
-});
+    }
 
-    saveShares(allShares);
+    const id = await share(cookies, url, amount, interval, label);
+
+    // ✅ SAVE TO MONGODB (PERSISTENT)
+    await Share.create({
+      id,
+      url,
+      time: Date.now()
+    });
+
     res.status(200).json({ status: 200, id });
   } catch (err) {
     return res.status(500).json({ status: 500, error: err.message || err });
   }
 });
 
-// ðŸ›‘ STOP API
+/* =======================
+   STOP API
+======================= */
 app.post('/api/stop', (req, res) => {
   const { id } = req.body;
 
@@ -106,27 +150,32 @@ app.post('/api/stop', (req, res) => {
     return res.status(404).json({ error: 'Walang active session na may ganitong id' });
   }
 
-  // Kung walang id, ihinto lahat ng session
   timers.forEach((timer, key) => {
     clearInterval(timer);
     total.delete(key);
   });
+
   timers.clear();
   return res.json({ status: 200, message: 'Lahat ng sessions tinigil na' });
 });
 
+/* =======================
+   SHARE LOGIC (DI BINAGO)
+======================= */
 async function share(cookies, url, amount, interval, label) {
   const id = await getPostID(url);
   const accessToken = await getAccessToken(cookies);
-  if (!id) throw new Error("Unable to get link id: invalid URL, it's either a private post or visible to friends only");
+  if (!id) throw new Error("Unable to get link id");
+
   total.set(id, {
-  url,
-  id,
-  label,
-  count: 0,
-  target: amount,
-  startTime: Date.now()
-});
+    url,
+    id,
+    label,
+    count: 0,
+    target: amount,
+    startTime: Date.now()
+  });
+
   const headers = {
     'accept': '*/*',
     'accept-encoding': 'gzip, deflate',
@@ -137,6 +186,7 @@ async function share(cookies, url, amount, interval, label) {
   };
 
   let sharedCount = 0;
+
   async function sharePost() {
     try {
       const response = await axios.post(
@@ -144,15 +194,20 @@ async function share(cookies, url, amount, interval, label) {
         {},
         { headers }
       );
+
       if (response.status === 200) {
-  total.set(id, { ...total.get(id), count: total.get(id).count + 1 });
-  sharedCount++;
-}
+        total.set(id, {
+          ...total.get(id),
+          count: total.get(id).count + 1
+        });
+        sharedCount++;
+      }
+
       if (sharedCount === amount) {
         clearInterval(timers.get(id));
         timers.delete(id);
       }
-    } catch (error) {
+    } catch {
       clearInterval(timers.get(id));
       timers.delete(id);
       total.delete(id);
@@ -162,7 +217,6 @@ async function share(cookies, url, amount, interval, label) {
   const timer = setInterval(sharePost, interval * 1000);
   timers.set(id, timer);
 
-  // auto cleanup
   setTimeout(() => {
     if (timers.has(id)) {
       clearInterval(timers.get(id));
@@ -174,46 +228,59 @@ async function share(cookies, url, amount, interval, label) {
   return id;
 }
 
+/* =======================
+   HELPERS (DI BINAGO)
+======================= */
 async function getPostID(url) {
   try {
-    const response = await axios.post('https://id.traodoisub.com/api.php', `link=${encodeURIComponent(url)}`, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
+    const response = await axios.post(
+      'https://id.traodoisub.com/api.php',
+      `link=${encodeURIComponent(url)}`,
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
     return response.data.id;
-  } catch {
-    return;
-  }
+  } catch {}
 }
 
 async function getAccessToken(cookie) {
   try {
-    const headers = {
-      'authority': 'business.facebook.com',
-      'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-      'cookie': cookie,
-      'referer': 'https://www.facebook.com/',
-    };
-    const response = await axios.get('https://business.facebook.com/content_management', { headers });
+    const response = await axios.get(
+      'https://business.facebook.com/content_management',
+      {
+        headers: {
+          'cookie': cookie,
+          'referer': 'https://www.facebook.com/'
+        }
+      }
+    );
+
     const token = response.data.match(/"accessToken":\s*"([^"]+)"/);
     if (token && token[1]) return token[1];
-  } catch {
-    return;
-  }
+  } catch {}
 }
 
 async function convertCookie(cookie) {
   return new Promise((resolve, reject) => {
     try {
       const cookies = JSON.parse(cookie);
-      const sbCookie = cookies.find(cookies => cookies.key === "sb");
-      if (!sbCookie) reject("Detect invalid appstate please provide a valid appstate");
-      const sbValue = sbCookie.value;
-      const data = `sb=${sbValue}; ${cookies.slice(1).map(cookies => `${cookies.key}=${cookies.value}`).join('; ')}`;
+      const sbCookie = cookies.find(c => c.key === "sb");
+      if (!sbCookie) reject("Invalid appstate");
+
+      const data = `sb=${sbCookie.value}; ${cookies
+        .slice(1)
+        .map(c => `${c.key}=${c.value}`)
+        .join('; ')}`;
+
       resolve(data);
     } catch {
-      reject("Error processing appstate please provide a valid appstate");
+      reject("Error processing appstate");
     }
   });
 }
 
-app.listen(5000);
+/* =======================
+   SERVER
+======================= */
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
+});
