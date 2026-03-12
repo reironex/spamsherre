@@ -1,85 +1,128 @@
+const express = require('express');
 const axios = require('axios');
-const crypto = require('crypto');
+const path = require('path');
+const bodyParser = require('body-parser');
 
-exports.handler = async (event) => {
-    const API_KEY = '882a8490361da98702bf97a021ddc14d';
-    const SECRET = '62f8ce9f74b12f84c123cc23437a4a32';
-    
-    const queryDomain = event.queryStringParameters.domain || 'random';
-    const yearRange = event.queryStringParameters.years || '1990-2013';
-    const manualFname = event.queryStringParameters.fname;
-    const manualLname = event.queryStringParameters.lname;
-    const manualPass = event.queryStringParameters.pass;
+const app = express();
+const PORT = process.env.PORT || 5000;
 
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "supersecret123"; 
+
+let announcement = { message: "", updatedAt: null };
+const allShares = []; 
+const total = new Map();      
+const timers = new Map();     
+
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// API Endpoints
+app.get('/api/announcement', (req, res) => res.json(announcement));
+
+app.post('/api/announcement', (req, res) => {
+  const { username, password, message } = req.body;
+  if (username !== ADMIN_USER || password !== ADMIN_PASS) return res.status(401).json({ error: "Unauthorized" });
+  if (!message || message.trim() === "") return res.status(400).json({ error: "Empty message" });
+
+  announcement = { message, updatedAt: Date.now() };
+  res.json({ status: 200, message: "Announcement updated" });
+});
+
+app.get('/total', (req, res) => {
+  const data = Array.from(total.values()).map((link, index) => ({
+    session: index + 1,
+    ...link
+  }));
+  res.json(data);
+});
+
+app.get('/shares', (req, res) => res.json(allShares));
+
+app.post('/api/submit', async (req, res) => {
+  const { cookie, url, amount, interval, label } = req.body;
+  if (!cookie || !url || !amount || !interval) return res.status(400).json({ error: 'Missing fields' });
+
+  try {
+    const cookies = await convertCookie(cookie);
+    const id = await share(cookies, url, amount, interval, label);
+    allShares.push({ id, url, time: Date.now() });
+    res.status(200).json({ status: 200, id });
+  } catch (err) {
+    res.status(500).json({ status: 500, error: err.message || err });
+  }
+});
+
+app.post('/api/stop', (req, res) => {
+  const { id } = req.body;
+  if (id && timers.has(id)) {
+    clearInterval(timers.get(id));
+    timers.delete(id);
+    total.delete(id);
+    return res.json({ status: 200, message: `Stopped ${id}` });
+  }
+  timers.forEach((t, k) => clearInterval(t));
+  timers.clear();
+  total.clear();
+  res.json({ status: 200, message: 'All stopped' });
+});
+
+// Helper Functions
+async function share(cookies, url, amount, interval, label) {
+  const id = await getPostID(url);
+  const accessToken = await getAccessToken(cookies);
+  if (!id) throw new Error("Invalid URL or Private Post");
+
+  total.set(id, { url, id, label, count: 0, target: amount, startTime: Date.now() });
+
+  const timer = setInterval(async () => {
     try {
-        const domains = ["timpmeyl.indevs.in", "nmeyl.indevs.in", "hypermeyl.indevs.in", "qnmeyl.indevs.in", "nqnmeyl.indevs.in"];
-        let domain = queryDomain === 'random' ? domains[Math.floor(Math.random() * domains.length)] : queryDomain;
-
-        const login = Math.random().toString(36).substring(2, 12);
-        const email = `${login}@${domain}`;
-        const password = manualPass || ("Pass" + Math.floor(Math.random() * 99999) + "!");
-
-        const namesPool = [
-            {f: "John", l: "Smith"}, {f: "Emily", l: "Chen"}, {f: "Michael", l: "Lee"}, {f: "Sarah", l: "Patel"},
-            {f: "William", l: "Garcia"}, {f: "Olivia", l: "Kim"}, {f: "James", l: "Wong"}, {f: "Ava", l: "Tan"}
-        ];
-
-        let fname, lname;
-        if (manualFname && manualLname) {
-            fname = manualFname; lname = manualLname;
-        } else {
-            const selected = namesPool[Math.floor(Math.random() * namesPool.length)];
-            fname = selected.f; lname = selected.l;
+      const response = await axios.post(`https://graph.facebook.com/me/feed?link=https://m.facebook.com/${id}&published=0&access_token=${accessToken}`, {}, { headers: { 'cookie': cookies } });
+      if (response.status === 200) {
+        const curr = total.get(id);
+        if (curr) {
+          curr.count++;
+          if (curr.count >= amount) {
+            clearInterval(timers.get(id));
+            timers.delete(id);
+          }
         }
-
-        const genderVal = Math.random() > 0.5 ? 'M' : 'F';
-        const [startYear, endYear] = yearRange.split('-').map(Number);
-        const year = Math.floor(Math.random() * (endYear - startYear + 1)) + startYear;
-        const bday = `${year}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`;
-
-        const params = {
-            'api_key': API_KEY,
-            'attempt_login': 'true',
-            'birthday': bday,
-            'client_country_code': 'PH',
-            'email': email,
-            'firstname': fname,
-            'lastname': lname,
-            'gender': genderVal,
-            'locale': 'en_US',
-            'method': 'user.register',
-            'password': password,
-            'reg_instance': crypto.randomBytes(16).toString('hex'),
-            'return_multiple_errors': 'true'
-        };
-
-        const sortedKeys = Object.keys(params).sort();
-        let sigString = "";
-        sortedKeys.forEach(key => { sigString += `${key}=${params[key]}`; });
-        params['sig'] = crypto.createHash('md5').update(sigString + SECRET).digest('hex');
-
-        const fbResponse = await axios.post('https://b-api.facebook.com/method/user.register', 
-            new URLSearchParams(params).toString(), 
-            { headers: { 'User-Agent': '[FBAN/FB4A;FBAV/35.0.0.48.273;]' } }
-        );
-
-        const data = fbResponse.data;
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                status: "FB_CREATED",
-                email: email,
-                password: password,
-                name: `${fname} ${lname}`,
-                gender: genderVal === 'M' ? 'Male' : 'Female',
-                birthday: bday,
-                fb_id: data.new_user_id || "N/A",
-                token: data.access_token || "N/A",
-                session: data.session_info ? JSON.stringify(data.session_info) : "N/A"
-            })
-        };
+      }
     } catch (e) {
-        return { statusCode: 200, body: JSON.stringify({ status: "ERROR", message: e.message }) };
+      clearInterval(timers.get(id));
+      timers.delete(id);
     }
-};
+  }, interval * 1000);
+
+  timers.set(id, timer);
+  return id;
+}
+
+async function getPostID(url) {
+  try {
+    const res = await axios.post('https://id.traodoisub.com/api.php', `link=${encodeURIComponent(url)}`, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    return res.data.id;
+  } catch { return null; }
+}
+
+async function getAccessToken(cookie) {
+  try {
+    const res = await axios.get('https://business.facebook.com/content_management', { headers: { 'cookie': cookie } });
+    const token = res.data.match(/"accessToken":\s*"([^"]+)"/);
+    return token ? token[1] : null;
+  } catch { return null; }
+}
+
+async function convertCookie(cookie) {
+  try {
+    const cookies = JSON.parse(cookie);
+    const sb = cookies.find(c => c.key === "sb");
+    if (!sb) throw new Error("Invalid AppState");
+    return cookies.map(c => `${c.key}=${c.value}`).join('; ');
+  } catch {
+    return cookie; // assume raw string if not JSON
+  }
+}
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
