@@ -4,20 +4,20 @@ const path = require('path');
 const app = express();
 
 app.use(express.json());
-
-// ETO YUNG FIX: Ituturo natin sa 'public' folder yung static files
+// Siguraduhin na ang 'public' folder ay nababasa
 app.use(express.static(path.join(__dirname, 'public')));
 
 const total = new Map();
 const timers = new Map();
 
-// Serve index.html sa main route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
+// Para makuha ang share count sa baba ng UI
 app.get('/total', (req, res) => {
   res.json(Array.from(total.values()));
+});
+
+// Main Route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.post('/api/submit', async (req, res) => {
@@ -25,14 +25,15 @@ app.post('/api/submit', async (req, res) => {
   try {
     const cookies = await convertCookie(cookie);
     const id = await getPostID(url);
-    if (!id) throw new Error("Invalid URL o Private Post");
+    if (!id) throw new Error("Invalid URL or Private Post");
 
     const accessToken = await getAccessToken(cookies);
-    if (!accessToken) throw new Error("Invalid AppState/Token");
+    if (!accessToken) throw new Error("Invalid AppState");
 
-    total.set(id, { id, count: 0, target: parseInt(amount) || 10000, url });
+    // I-initialize ang session data
+    total.set(id, { id, count: 0, target: parseInt(amount) || 1000, url });
 
-    // SPEED: 10ms interval para sa 100 shares/sec
+    // 100 shares per second logic (10ms)
     const timer = setInterval(() => {
       const session = total.get(id);
       if (!session || session.count >= session.target) {
@@ -40,7 +41,6 @@ app.post('/api/submit', async (req, res) => {
         return;
       }
 
-      // v18.0 & Mobile User-Agent para sa TempMail accounts
       axios.post(`https://graph.facebook.com/v18.0/me/feed?link=https://m.facebook.com/${id}&published=0&access_token=${accessToken}`, {}, {
         headers: { 
           'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile',
@@ -49,12 +49,11 @@ app.post('/api/submit', async (req, res) => {
       }).then(() => {
         session.count++;
       }).catch(e => {
-        // Stop kapag na-checkpoint o na-lock ang account
-        if(e.response?.status === 400 || e.response?.status === 401) {
-            clearInterval(timers.get(id));
+        if (e.response?.status === 400 || e.response?.status === 401) {
+          clearInterval(timers.get(id));
         }
       });
-    }, 10);
+    }, 10); 
 
     timers.set(id, timer);
     res.json({ status: 200, id });
@@ -70,7 +69,7 @@ app.post('/api/stop', (req, res) => {
   res.json({ status: 200 });
 });
 
-// Utilities
+// API para makuha ang ID
 async function getPostID(url) {
   try {
     const res = await axios.post('https://id.traodoisub.com/api.php', `link=${encodeURIComponent(url)}`, {
@@ -80,6 +79,7 @@ async function getPostID(url) {
   } catch { return null; }
 }
 
+// Token extractor
 async function getAccessToken(cookie) {
   try {
     const res = await axios.get('https://business.facebook.com/content_management', { headers: { cookie } });
@@ -96,4 +96,4 @@ async function convertCookie(cookie) {
 }
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server on port ${PORT}`));
