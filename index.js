@@ -1,133 +1,87 @@
 const express = require('express');
 const axios = require('axios');
-const path = require('path');
-const bodyParser = require('body-parser');
-
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-const ADMIN_USER = "admin";
-const ADMIN_PASS = "supersecret123"; 
-
-let announcement = { message: "", updatedAt: null };
-const allShares = []; 
-const total = new Map();      
-const timers = new Map();     
 
 app.use(express.json());
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// API Endpoints
-app.get('/api/announcement', (req, res) => res.json(announcement));
-
-app.post('/api/announcement', (req, res) => {
-  const { username, password, message } = req.body;
-  if (username !== ADMIN_USER || password !== ADMIN_PASS) return res.status(401).json({ error: "Unauthorized" });
-  announcement = { message, updatedAt: Date.now() };
-  res.json({ status: 200, message: "Announcement updated" });
-});
+const total = new Map();
+const timers = new Map();
 
 app.get('/total', (req, res) => {
-  const data = Array.from(total.values()).map((link, index) => ({
-    session: index + 1,
-    ...link
-  }));
-  res.json(data);
+  res.json(Array.from(total.values()));
 });
 
-app.get('/shares', (req, res) => res.json(allShares));
-
 app.post('/api/submit', async (req, res) => {
-  const { cookie, url, amount, interval, isTurbo } = req.body;
-
-  if (!cookie || !url || !amount) {
-    return res.status(400).json({ error: 'Kulang ang data na nilagay mo.' });
-  }
-
+  const { cookie, url, amount, interval } = req.body;
   try {
-    const cleanCookie = await convertCookie(cookie);
+    const cookies = await convertCookie(cookie);
     const id = await getPostID(url);
-    const accessToken = await getAccessToken(cleanCookie);
+    if (!id) throw new Error("Private link or invalid URL");
 
-    if (!id) throw new Error("Invalid Post URL.");
-    if (!accessToken) throw new Error("Invalid Cookie/AppState.");
-
-    total.set(id, { url, id, count: 0, target: parseInt(amount), startTime: Date.now() });
-
-    let timer;
-    if (isTurbo) {
-      timer = setInterval(() => {
-        const curr = total.get(id);
-        if (!curr || curr.count >= amount) return stopSession(id);
-        for (let i = 0; i < 100; i++) {
-          if (curr.count < amount) runShareRequest(id, accessToken, cleanCookie);
-        }
-      }, 1000);
-    } else {
-      timer = setInterval(() => {
-        const curr = total.get(id);
-        if (!curr || curr.count >= amount) return stopSession(id);
-        runShareRequest(id, accessToken, cleanCookie);
-      }, parseInt(interval) * 1000);
-    }
-
-    timers.set(id, timer);
-    allShares.push({ id, url, time: Date.now() });
-    res.status(200).json({ status: 200, id });
-
+    startSharing(cookies, id, amount, interval, url);
+    res.json({ status: 200, id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/stop', (req, res) => {
-  const { id } = req.body;
-  if (id) {
-    stopSession(id);
-  } else {
-    timers.forEach((t, k) => clearInterval(t));
-    timers.clear();
-    total.clear();
-  }
-  res.json({ status: 200, message: 'Stopped' });
-});
+async function startSharing(cookies, id, amount, interval, url) {
+  const accessToken = await getAccessToken(cookies);
+  total.set(id, { id, count: 0, target: amount, url });
 
-async function runShareRequest(id, token, cookie) {
-  try {
-    await axios.post(`https://graph.facebook.com/me/feed?link=https://m.facebook.com/${id}&published=0&access_token=${token}`, {}, { headers: { 'cookie': cookie } });
-    const curr = total.get(id);
-    if (curr) curr.count++;
-  } catch (e) {}
+  // 100 shares per second logic (10ms interval)
+  const timer = setInterval(async () => {
+    const session = total.get(id);
+    if (!session || session.count >= amount) {
+      clearInterval(timers.get(id));
+      return;
+    }
+
+    try {
+      // Fire and forget for maximum speed
+      axios.post(`https://graph.facebook.com/v18.0/me/feed?link=https://m.facebook.com/${id}&published=0&access_token=${accessToken}`, {}, {
+        headers: { 
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile',
+          'Cookie': cookies 
+        }
+      }).then(() => {
+        session.count++;
+      }).catch(e => {
+        if(e.response?.status === 400) clearInterval(timers.get(id)); // Stop on lock
+      });
+    } catch (e) {}
+  }, 10); // 10ms = 100 requests per second
+
+  timers.set(id, timer);
 }
 
-function stopSession(id) {
-  if (timers.has(id)) {
-    clearInterval(timers.get(id));
-    timers.delete(id);
-  }
-}
-
+// Utility functions (Simplified)
 async function getPostID(url) {
   try {
-    const res = await axios.post('https://id.traodoisub.com/api.php', `link=${encodeURIComponent(url)}`, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    const res = await axios.post('https://id.traodoisub.com/api.php', `link=${encodeURIComponent(url)}`, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
     return res.data.id;
   } catch { return null; }
 }
 
 async function getAccessToken(cookie) {
-  try {
-    const res = await axios.get('https://business.facebook.com/content_management', { headers: { 'cookie': cookie, 'user-agent': 'Mozilla/5.0' } });
-    const token = res.data.match(/"accessToken":\s*"([^"]+)"/);
-    return token ? token[1] : null;
-  } catch { return null; }
+  const res = await axios.get('https://business.facebook.com/content_management', { headers: { cookie } });
+  return res.data.match(/"accessToken":\s*"([^"]+)"/)[1];
 }
 
 async function convertCookie(cookie) {
   try {
-    const cookies = JSON.parse(cookie);
-    return cookies.map(c => `${c.key}=${c.value}`).join('; ');
+    const json = JSON.parse(cookie);
+    return json.map(c => `${c.key}=${c.value}`).join('; ');
   } catch { return cookie; }
 }
 
-app.listen(PORT, () => console.log(`Server on ${PORT}`));
+app.post('/api/stop', (req, res) => {
+  timers.forEach(t => clearInterval(t));
+  timers.clear();
+  total.clear();
+  res.json({ status: 200 });
+});
+
+app.listen(5000, () => console.log("Server running on port 5000"));
