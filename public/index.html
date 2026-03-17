@@ -6,94 +6,66 @@
   <title>ShareBoost ▸</title>
   <style>
     :root { --neon: #ff4ecd; --bg: #0d0d12; --panel: #15151f; }
-    body { font-family: monospace; background: var(--bg); color: #eee; margin: 0; padding: 20px; }
-    .container { max-width: 500px; margin: 0 auto; }
-    h1 { color: var(--neon); text-align: center; letter-spacing: 2px; }
-    .box { background: var(--panel); border: 1px solid rgba(255, 78, 205, 0.2); padding: 20px; border-radius: 4px; margin-bottom: 20px; }
-    .label { color: var(--neon); font-size: 12px; margin-bottom: 8px; display: block; }
-    input { width: 100%; background: #1c1c2b; border: none; border-bottom: 2px solid #2a2a3d; color: #fff; padding: 10px; box-sizing: border-box; margin-bottom: 15px; outline: none; }
-    input:focus { border-bottom: 2px solid var(--neon); }
-    .btns { display: flex; gap: 10px; }
-    button { flex: 1; padding: 12px; border: none; cursor: pointer; font-weight: bold; color: white; border-radius: 2px; }
-    #start { background: var(--neon); }
-    #stop { background: #2a2a3d; }
-    
-    /* Stats Styling */
-    #status-container { display: none; }
-    .stat-card { background: #0d0d12; padding: 15px; border-left: 3px solid var(--neon); margin-top: 10px; font-size: 13px; }
-    .progress-bg { background: #222; width: 100%; height: 5px; margin-top: 10px; }
-    .progress-bar { background: var(--neon); height: 100%; width: 0%; transition: 0.3s; }
+    body { font-family: monospace; background: var(--bg); color: #eee; padding: 20px; text-align: center; }
+    .box { max-width: 450px; margin: 20px auto; background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,78,205,0.2); }
+    h1 { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+    input { width: 100%; padding: 10px; margin: 10px 0; background: #1c1c2b; border: 1px solid #333; color: #fff; box-sizing: border-box; }
+    button { width: 48%; padding: 12px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; }
+    #start { background: var(--neon); color: white; }
+    #stop { background: #333; color: #ccc; }
+    .stat-card { text-align: left; background: #0d0d12; padding: 10px; border-left: 4px solid var(--neon); margin-top: 10px; font-size: 13px; }
+    .progress { height: 5px; background: #222; margin-top: 8px; }
+    .bar { height: 100%; background: var(--neon); transition: 0.3s; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>﹌ ShareBoost ▸</h1>
-    <div class="box">
-      <span class="label">▸ APPSTATE JSON</span>
-      <input type="text" id="cookie" placeholder="Paste your AppState here">
-      <span class="label">▸ POST URL</span>
-      <input type="text" id="url" placeholder="Facebook Post Link">
-      <div class="btns">
-        <button id="start">EXECUTE</button>
-        <button id="stop">KILL</button>
-      </div>
-    </div>
-
-    <div id="status-container" class="box">
-      <span class="label">▸ LIVE STATUS</span>
-      <div id="stats-list"></div>
+  <h1>﹌ ShareBoost ▸</h1>
+  <div class="box">
+    <input type="text" id="cookie" placeholder="AppState JSON / Cookie">
+    <input type="text" id="url" placeholder="Facebook Link">
+    <input type="number" id="amount" placeholder="Limit (e.g. 1000)" value="1000">
+    <input type="number" id="interval" placeholder="Interval (ms) - Recommended: 2000" value="2000">
+    <div style="display:flex; gap:10px;">
+      <button id="start" onclick="submit()">EXECUTE</button>
+      <button id="stop" onclick="stop()">KILL</button>
     </div>
   </div>
 
+  <div id="status-container" class="box" style="display:none;">
+    <div id="stats-list"></div>
+  </div>
+
   <script>
-    const startBtn = document.getElementById('start');
-    const statusContainer = document.getElementById('status-container');
-    const statsList = document.getElementById('stats-list');
-
-    startBtn.onclick = async () => {
-      const cookie = document.getElementById('cookie').value;
-      const url = document.getElementById('url').value;
-
-      if(!cookie || !url) return alert("Paki-fill up lahat!");
-
-      startBtn.innerHTML = "STARTING...";
+    async function submit() {
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cookie, url, amount: 10000 })
+        body: JSON.stringify({
+          cookie: document.getElementById('cookie').value,
+          url: document.getElementById('url').value,
+          amount: document.getElementById('amount').value,
+          interval: document.getElementById('interval').value
+        })
       });
+      if(res.ok) document.getElementById('status-container').style.display = 'block';
+    }
 
-      if(res.ok) {
-        statusContainer.style.display = 'block';
-        startBtn.innerHTML = "RUNNING";
-      } else {
-        alert("Error: Check your AppState");
-        startBtn.innerHTML = "EXECUTE";
-      }
-    };
+    async function stop() { await fetch('/api/stop', { method: 'POST' }); }
 
-    // Loop para i-update ang stats kada segundo
     setInterval(async () => {
-      try {
-        const res = await fetch('/total');
-        const data = await res.json();
-        
-        if (data.length > 0) {
-          statusContainer.style.display = 'block';
-          statsList.innerHTML = data.map(item => `
-            <div class="stat-card">
-              <div>▸ TARGET ID: ${item.id}</div>
-              <div style="margin-top:5px; color: #ff4ecd;">▸ SHARED: ${item.count} / ${item.target}</div>
-              <div class="progress-bg">
-                <div class="progress-bar" style="width: ${(item.count/item.target)*100}%"></div>
-              </div>
-            </div>
-          `).join('');
-        }
-      } catch (e) { console.error("Update error"); }
+      const res = await fetch('/total');
+      const data = await res.json();
+      if(data.length > 0) {
+        document.getElementById('status-container').style.display = 'block';
+        document.getElementById('stats-list').innerHTML = data.map(item => `
+          <div class="stat-card" style="border-color: ${item.status === 'failed' ? 'red' : '#ff4ecd'}">
+            ▸ ID: ${item.id} [${item.status.toUpperCase()}]<br>
+            ▸ SHARED: ${item.count} / ${item.target}
+            <div class="progress"><div class="bar" style="width:${(item.count/item.target)*100}%"></div></div>
+          </div>
+        `).join('');
+      }
     }, 1000);
-
-    document.getElementById('stop').onclick = () => fetch('/api/stop', { method: 'POST' });
   </script>
 </body>
 </html>
