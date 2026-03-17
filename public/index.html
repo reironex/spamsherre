@@ -1,129 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ShareBoost — FB Tool</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShareBoost ▸</title>
   <style>
     :root { --neon: #ff4ecd; --bg: #0d0d12; --panel: #15151f; }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; text-align: center; }
+    body { font-family: monospace; background: var(--bg); color: #eee; margin: 0; padding: 20px; }
     
-    /* Header & Hacker Style */
-    h1 { color: var(--neon); margin-top: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
-    .tagline { font-size: 14px; color: #777; margin-bottom: 20px; font-family: monospace; }
-
-    /* Compact Form */
-    form, #auth-container, #process-container {
-      max-width: 420px; margin: 0 auto 15px auto; background: var(--panel);
-      padding: 20px; border-radius: 4px; border: 1px solid rgba(255, 78, 205, 0.1);
-    }
-
-    .form-group { margin-bottom: 12px; text-align: left; }
-    .label-icon { font-size: 12px; color: var(--neon); display: block; margin-bottom: 5px; font-weight: bold; }
+    .container { max-width: 500px; margin: 0 auto; }
+    h1 { color: var(--neon); letter-spacing: 2px; text-align: center; }
     
-    input {
-      width: 100%; padding: 10px; box-sizing: border-box; background: #1c1c2b;
-      border: none; border-bottom: 2px solid #2a2a3d; color: #fff; outline: none; transition: 0.3s;
+    .box { background: var(--panel); border: 1px solid rgba(255, 78, 205, 0.2); padding: 20px; border-radius: 4px; }
+    .label { color: var(--neon); font-size: 12px; margin-bottom: 8px; display: block; }
+    
+    input { 
+      width: 100%; background: #1c1c2b; border: none; border-bottom: 2px solid #2a2a3d; 
+      color: #fff; padding: 10px; box-sizing: border-box; margin-bottom: 15px; outline: none;
     }
     input:focus { border-bottom: 2px solid var(--neon); }
 
-    .cookie-row { display: flex; gap: 5px; }
-    #convert-button { background: #333; color: #ccc; border: none; padding: 0 15px; cursor: pointer; font-size: 12px; }
+    .btns { display: flex; gap: 10px; }
+    button { 
+      flex: 1; padding: 12px; border: none; cursor: pointer; font-weight: bold; 
+      transition: 0.3s; color: white; border-radius: 2px;
+    }
+    #start { background: var(--neon); }
+    #stop { background: #2a2a3d; }
+    button:hover { opacity: 0.8; }
 
-    /* Buttons */
-    .btn-container { display: flex; gap: 10px; margin-top: 15px; }
-    button { flex: 1; padding: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; border-radius: 2px; }
-    #submit-button { background: var(--neon); color: #fff; }
-    #stop-button { background: #2a2a3d; color: #eee; }
-    button:hover { opacity: 0.8; transform: translateY(-1px); }
-
-    /* Processing Box */
-    .current-online { background: #0d0d12; padding: 10px; border-radius: 4px; margin-top: 5px; font-size: 13px; text-align: left; border-left: 3px solid var(--neon); }
-    .progress-bar { height: 4px; background: var(--neon); width: 0%; transition: 0.5s; margin-top: 5px; }
-
-    #announcement-bar { background: var(--neon); color: #000; padding: 8px; font-size: 12px; font-weight: bold; display: none; }
-    #menu-btn { position: fixed; top: 15px; left: 15px; cursor: pointer; color: var(--neon); font-size: 20px; }
+    #status-box { margin-top: 20px; display: none; }
+    .stat-item { background: #0d0d12; padding: 10px; border-left: 3px solid var(--neon); font-size: 13px; }
+    .progress { height: 4px; background: var(--neon); transition: 0.4s; margin-top: 5px; }
   </style>
 </head>
 <body>
-
-  <div id="menu-btn">☰</div>
-  <div id="announcement-bar"></div>
-
-  <h1>﹌ ShareBoost ▸</h1>
-  <div class="tagline" id="tagline">System.Ready_</div>
-
-  <form id="main-form">
-    <div class="form-group">
-      <span class="label-icon">▸ AUTHENTICATION (APPSTATE)</span>
-      <div class="cookie-row">
-        <input type="text" id="cookies" placeholder="Paste AppState/Cookie" required>
-        <button type="button" id="convert-button">FIX</button>
+  <div class="container">
+    <h1>﹌ ShareBoost ▸</h1>
+    
+    <div class="box">
+      <span class="label">▸ APPSTATE / COOKIE</span>
+      <input type="text" id="cookie" placeholder="Paste AppState JSON">
+      
+      <span class="label">▸ TARGET URL</span>
+      <input type="text" id="url" placeholder="Facebook Post Link">
+      
+      <div class="btns">
+        <button id="start">EXECUTE</button>
+        <button id="stop">KILL</button>
       </div>
     </div>
 
-    <div class="form-group">
-      <span class="label-icon">▸ TARGET_LINK</span>
-      <input type="text" id="urls" placeholder="Facebook Post URL" required>
+    <div id="status-box" class="box">
+      <div id="stats-list"></div>
     </div>
-
-    <div class="btn-container">
-      <button type="submit" id="submit-button">EXECUTE</button>
-      <button type="button" id="stop-button">KILL_ALL</button>
-    </div>
-  </form>
-
-  <div id="process-container" style="display:none;">
-    <div id="share-summary" style="color:var(--neon); font-weight:bold; margin-bottom:10px;"></div>
-    <div id="processing"></div>
   </div>
 
   <script>
-    const form = document.getElementById('main-form');
-    const processContainer = document.getElementById('process-container');
-    const processingDiv = document.getElementById('processing');
+    const startBtn = document.getElementById('start');
+    const stopBtn = document.getElementById('stop');
+    const statusBox = document.getElementById('status-box');
 
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('submit-button');
-      btn.innerHTML = "RUNNING...";
-      
-      const res = await fetch("/api/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    startBtn.onclick = async () => {
+      startBtn.innerHTML = "RUNNING...";
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cookie: document.getElementById("cookies").value,
-          url: document.getElementById("urls").value,
-          amount: 10000, // Default high limit
-          interval: 0.01 // 10ms for 100/sec
+          cookie: document.getElementById('cookie').value,
+          url: document.getElementById('url').value,
+          amount: 50000 
         })
       });
-      
-      const data = await res.json();
-      if(data.status === 200) processContainer.style.display = "block";
-      btn.innerHTML = "EXECUTE";
+      if(res.ok) statusBox.style.display = 'block';
+      startBtn.innerHTML = "EXECUTE";
     };
 
-    // Auto-refresh stats
+    stopBtn.onclick = () => fetch('/api/stop', { method: 'POST' });
+
     setInterval(async () => {
-      const res = await fetch("/total");
+      const res = await fetch('/total');
       const data = await res.json();
       if(data.length > 0) {
-        processContainer.style.display = "block";
-        processingDiv.innerHTML = data.map(item => `
-          <div class="current-online">
-            <div>▸ ID: ${item.id}</div>
-            <div>▸ SHARES: ${item.count} / ${item.target}</div>
-            <div style="background:#222; width:100%; margin-top:5px;">
-              <div class="progress-bar" style="width:${(item.count/item.target)*100}%"></div>
-            </div>
+        statusBox.style.display = 'block';
+        document.getElementById('stats-list').innerHTML = data.map(s => `
+          <div class="stat-item">
+            ▸ ID: ${s.id}<br>
+            ▸ SHARES: ${s.count} / ${s.target}
+            <div style="background:#222; width:100%;"><div class="progress" style="width:${(s.count/s.target)*100}%"></div></div>
           </div>
         `).join('');
       }
     }, 1000);
-
-    document.getElementById("stop-button").onclick = () => fetch("/api/stop", { method: "POST" });
   </script>
 </body>
 </html>
