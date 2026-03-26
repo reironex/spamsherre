@@ -14,8 +14,6 @@
     #start { background: var(--neon); color: white; }
     #stop { background: #333; color: #ccc; }
     .stat-card { text-align: left; background: #0d0d12; padding: 10px; border-left: 4px solid var(--neon); margin-top: 10px; font-size: 13px; }
-    .progress { height: 5px; background: #222; margin-top: 8px; }
-    .bar { height: 100%; background: var(--neon); transition: 0.3s; }
   </style>
 </head>
 <body>
@@ -23,11 +21,11 @@
   <div class="box">
     <input type="text" id="cookie" placeholder="AppState JSON / Cookie">
     <input type="text" id="url" placeholder="Facebook Link">
-    <input type="number" id="amount" placeholder="Limit (e.g. 1000)" value="1000">
-    <input type="number" id="interval" placeholder="Interval (ms) - Recommended: 2000" value="2000">
+    <input type="number" id="amount" placeholder="Limit" value="1000">
+    <input type="number" id="interval" placeholder="Interval (ms)" value="2000">
     <div style="display:flex; gap:10px;">
       <button id="start" onclick="submit()">EXECUTE</button>
-      <button id="stop" onclick="stop()">KILL</button>
+      <button id="stop" onclick="stopProcess()">KILL</button>
     </div>
   </div>
 
@@ -36,36 +34,56 @@
   </div>
 
   <script>
+    let timer = null;
+    let count = 0;
+
     async function submit() {
-      const res = await fetch('/api/submit', {
+      const cookieVal = document.getElementById('cookie').value;
+      const urlVal = document.getElementById('url').value;
+      const target = parseInt(document.getElementById('amount').value);
+      const delay = parseInt(document.getElementById('interval').value);
+
+      // Kunin muna ang Token at ID sa Backend
+      const res = await fetch('/api/share', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cookie: document.getElementById('cookie').value,
-          url: document.getElementById('url').value,
-          amount: document.getElementById('amount').value,
-          interval: document.getElementById('interval').value
-        })
+        body: JSON.stringify({ cookie: cookieVal, url: urlVal })
       });
-      if(res.ok) document.getElementById('status-container').style.display = 'block';
+      const data = await res.json();
+
+      if(!res.ok) return alert("Error: " + data.error);
+
+      document.getElementById('status-container').style.display = 'block';
+      count = 0;
+
+      timer = setInterval(async () => {
+        if(count >= target) return stopProcess();
+
+        try {
+          // Ang browser na mismo ang mag-sesend sa FB Graph API
+          await fetch(`https://graph.facebook.com/v18.0/me/feed?link=https://facebook.com/${data.id}&published=0&access_token=${data.accessToken}`, {
+            method: 'POST'
+          });
+          count++;
+          updateUI(data.id, count, target, "RUNNING");
+        } catch (e) {
+          updateUI(data.id, count, target, "FAILED");
+          stopProcess();
+        }
+      }, delay);
     }
 
-    async function stop() { await fetch('/api/stop', { method: 'POST' }); }
+    function stopProcess() {
+      clearInterval(timer);
+      alert("Process Stopped/Completed");
+    }
 
-    setInterval(async () => {
-      const res = await fetch('/total');
-      const data = await res.json();
-      if(data.length > 0) {
-        document.getElementById('status-container').style.display = 'block';
-        document.getElementById('stats-list').innerHTML = data.map(item => `
-          <div class="stat-card" style="border-color: ${item.status === 'failed' ? 'red' : '#ff4ecd'}">
-            ▸ ID: ${item.id} [${item.status.toUpperCase()}]<br>
-            ▸ SHARED: ${item.count} / ${item.target}
-            <div class="progress"><div class="bar" style="width:${(item.count/item.target)*100}%"></div></div>
-          </div>
-        `).join('');
-      }
-    }, 1000);
+    function updateUI(id, current, target, status) {
+      document.getElementById('stats-list').innerHTML = `
+        <div class="stat-card">
+          ▸ ID: ${id} [${status}]<br>
+          ▸ SHARED: ${current} / ${target}
+        </div>`;
+    }
   </script>
 </body>
 </html>
