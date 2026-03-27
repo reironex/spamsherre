@@ -15,14 +15,16 @@ const sessionOrder = [];
 app.get('/total', (req, res) => {
   const data = sessionOrder.map((key, index) => {
     const link = total.get(key);
+    if (!link) return null;
     return {
+      key: key, // kailangan ito para sa delete function
       session: index + 1,
       id: link.id,
       count: link.count,
       target: link.target,
       status: link.status
     };
-  });
+  }).filter(item => item !== null);
   res.json(data);
 });
 
@@ -39,7 +41,7 @@ app.post('/api/submit', async (req, res) => {
 
     if (!id || !accessToken) throw new Error("Invalid Link or AppState");
 
-    const sessionKey = `${id}_${Date.now()}`; 
+    const sessionKey = `sess_${Date.now()}`; 
     total.set(sessionKey, { id, count: 0, target: amount, status: "running" });
     sessionOrder.push(sessionKey); 
     
@@ -71,12 +73,22 @@ app.post('/api/submit', async (req, res) => {
   }
 });
 
+// Individual Delete Endpoint
+app.post('/api/delete', (req, res) => {
+  const { key } = req.body;
+  if (timers.has(key)) clearInterval(timers.get(key));
+  total.delete(key);
+  const idx = sessionOrder.indexOf(key);
+  if (idx > -1) sessionOrder.splice(idx, 1);
+  res.json({ status: 200 });
+});
+
 app.post('/api/stop', (req, res) => {
   timers.forEach(t => clearInterval(t));
   timers.clear();
   total.clear();
   sessionOrder.length = 0; 
-  res.json({ status: 200, message: 'Stopped all' });
+  res.json({ status: 200 });
 });
 
 async function getPostID(url) {
