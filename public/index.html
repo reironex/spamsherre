@@ -9,11 +9,11 @@
     body { font-family: monospace; background: var(--bg); color: #eee; padding: 20px; text-align: center; }
     .box { max-width: 450px; margin: 20px auto; background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,78,205,0.2); }
     h1 { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
-    input { width: 100%; padding: 10px; margin: 10px 0; background: #1c1c2b; border: 1px solid #333; color: #fff; box-sizing: border-box; outline: none; }
+    input { width: 100%; padding: 12px; margin: 10px 0; background: #1c1c2b; border: 1px solid #333; color: #fff; box-sizing: border-box; outline: none; border-radius: 4px; }
     button { width: 48%; padding: 12px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; }
     #start { background: var(--neon); color: white; }
     #stop { background: #333; color: #ccc; }
-    .stat-card { text-align: left; background: #0d0d12; padding: 15px; border-left: 4px solid var(--neon); margin-top: 10px; font-size: 13px; }
+    .stat-card { text-align: left; background: #0d0d12; padding: 15px; border-left: 4px solid var(--neon); margin-top: 15px; font-size: 13px; }
     .progress { height: 6px; background: #222; margin-top: 10px; border-radius: 10px; overflow: hidden; }
     .bar { height: 100%; background: var(--neon); transition: 0.3s; }
   </style>
@@ -30,43 +30,24 @@
       <button id="stop" onclick="stop()">KILL</button>
     </div>
   </div>
-
-  <div id="status-container" class="box" style="display:none;">
-    <div id="stats-list"></div>
-  </div>
-
+  <div id="status-container" class="box" style="display:none;"><div id="stats-list"></div></div>
   <script>
     async function submit() {
-      const btn = document.getElementById('start');
-      btn.innerText = "STARTING...";
-      btn.disabled = true;
+      const cookie = document.getElementById('cookie').value;
+      const url = document.getElementById('url').value;
+      const amount = document.getElementById('amount').value;
+      const interval = document.getElementById('interval').value;
+      if(!cookie || !url || !amount || !interval) return alert("Fill all fields!");
 
-      try {
-        const res = await fetch('/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cookie: document.getElementById('cookie').value,
-            url: document.getElementById('url').value,
-            amount: document.getElementById('amount').value,
-            interval: document.getElementById('interval').value
-          })
-        });
-        if(res.ok) document.getElementById('status-container').style.display = 'block';
-        else { const err = await res.json(); alert(err.error); }
-      } catch (e) {
-        alert("Error connecting to server");
-      } finally {
-        btn.innerText = "EXECUTE";
-        btn.disabled = false;
-      }
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cookie, url, amount, interval })
+      });
+      if(res.ok) document.getElementById('status-container').style.display = 'block';
+      else { const err = await res.json(); alert(err.error); }
     }
-
-    async function stop() { 
-      await fetch('/api/stop', { method: 'POST' }); 
-      location.reload();
-    }
-
+    async function stop() { await fetch('/api/stop', { method: 'POST' }); location.reload(); }
     setInterval(async () => {
       try {
         const res = await fetch('/total');
@@ -79,11 +60,10 @@
               ▸ POST ID: ${item.id}<br>
               ▸ SHARED: ${item.count} / ${item.target} [${item.status.toUpperCase()}]
               <div class="progress"><div class="bar" style="width:${(item.count/item.target)*100}%"></div></div>
-            </div>
-          `).join('');
+            </div>`).join('');
         }
       } catch (e) {}
-    }, 1500);
+    }, 2000);
   </script>
 </body>
 </html>
