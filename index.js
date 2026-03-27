@@ -1,17 +1,16 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
-const bodyParser = require('body-parser');
 const app = express();
 
 app.use(express.json());
-app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const total = new Map();      
 const timers = new Map();     
 
 app.get('/total', (req, res) => {
+  // Ginawang array para mabasa ng frontend nang tama
   res.json(Array.from(total.values()));
 });
 
@@ -28,15 +27,14 @@ app.post('/api/submit', async (req, res) => {
 
     if (!id || !accessToken) throw new Error("Invalid Link or AppState");
 
-    // Kunin ang UID ng account para sa display
+    // Kunin ang UID para sa display
     const userRes = await axios.get(`https://graph.facebook.com/me?access_token=${accessToken}`);
     const userUID = userRes.data.id;
 
-    // UNIQUE KEY: Pinagsamang UID at Post ID para laging hiwalay sa logs
+    // UNIQUE KEY: UID + ID para kahit same link, hiwalay ang entry
     const sessionKey = `${userUID}_${id}`; 
 
     total.set(sessionKey, { 
-      url, 
       id, 
       userUID, 
       count: 0, 
