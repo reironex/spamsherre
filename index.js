@@ -1,22 +1,17 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
-const bodyParser = require('body-parser');
 const app = express();
 
 app.use(express.json());
-app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const total = new Map();      
 const timers = new Map();     
 
 app.get('/total', (req, res) => {
-  const data = Array.from(total.values());
-  res.json(data);
+  res.json(Array.from(total.values()));
 });
-
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 app.post('/api/submit', async (req, res) => {
   const { cookie, url, amount, interval } = req.body;
@@ -29,22 +24,17 @@ app.post('/api/submit', async (req, res) => {
 
     if (!id || !accessToken) throw new Error("Invalid Link or AppState");
 
-    // Kunin ang User Info (Name at UID)
+    // Kunin ang Name at UID para sa Display
     const userRes = await axios.get(`https://graph.facebook.com/me?access_token=${accessToken}`);
     const userName = userRes.data.name;
     const userUID = userRes.data.id;
 
-    // Gamitin ang accessToken bilang UNIQUE KEY para hindi mag-merge ang same links
+    // UNIQUE KEY: Para hindi mag-merge ang accounts sa display
     const sessionKey = accessToken; 
 
     total.set(sessionKey, { 
-      url, 
-      id, 
-      userName, 
-      userUID, 
-      count: 0, 
-      target: amount, 
-      status: "running" 
+      url, id, userName, userUID, 
+      count: 0, target: amount, status: "running" 
     });
     
     const timer = setInterval(async () => {
