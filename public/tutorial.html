@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ShareBoost Tutorial</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --bg: #080c0a;
+      --panel: #111d16;
+      --neon: #00ff88;
+      --text: #e9ecff;
+      --muted: #557a66;
+      --radius: 16px;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      background: var(--panel);
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      color: var(--neon);
+      text-shadow: 0 0 10px var(--neon);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 2px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(0,255,136,0.05);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--neon);
+    }
+
+    h2 span { color: #fff; font-size: 13px; opacity: 0.8; text-transform: uppercase; }
+
+    p { color: var(--muted); font-size: 14px; margin-bottom: 15px; }
+
+    .illu img {
+      width: 100%;
+      border-radius: 10px;
+      display: block;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0 25px;
+      padding: 15px;
+      border-radius: 10px;
+      background: var(--neon);
+      color: #000;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px var(--neon); }
+
+    .video-container {
+      position: relative;
+      padding-bottom: 177.77%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 2px solid var(--neon);
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px 0;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><i class="fa-solid fa-bolt"></i> TURBO GUIDE</h1>
+</header>
+
+<main class="container">
+
+  <a href="/" class="back-btn">
+    <i class="fa-solid fa-arrow-left"></i> RETURN TO MAIN PANEL
+  </a>
+
+  <section class="card">
+    <h2><i class="fa-solid fa-download"></i> Step 1 <span>– Install Firefox</span></h2>
+    <p>Go to the PlayStore or AppStore and download the Firefox browser.</p>
+    <div class="illu"><img src="https://i.ibb.co/CKX6mpdc/Screenshot-20251126-090631.png"></div>
+  </section>
+
+  <section class="card">
+    <h2><i class="fa-solid fa-user-lock"></i> Step 2 <span>– Login Account</span></h2>
+    <p>Log in to your Facebook dummy account using the Firefox browser.</p>
+    <div class="illu"><img src="https://i.imgur.com/YNCDfuf.jpeg"></div>
+  </section>
+
+  <section class="card">
+    <h2><i class="fa-solid fa-puzzle-piece"></i> Step 3 <span>– Cookie Extension</span></h2>
+    <p>Install the "Cookie-Editor" extension from the Firefox add-ons store.</p>
+    <div class="illu"><img src="https://i.imgur.com/AxuX6Hp.jpeg"></div>
+  </section>
+
+  <section class="card">
+    <h2><i class="fa-solid fa-file-export"></i> Step 4 <span>– Get AppState</span></h2>
+    <p>Open Cookie-Editor, click "Export", and copy the JSON string (AppState).</p>
+    <div class="illu"><img src="https://i.imgur.com/5QdyFUi.jpeg"></div>
+  </section>
+
+  <section class="card">
+    <h2><i class="fa-solid fa-paste"></i> Step 5 <span>– Paste & Launch</span></h2>
+    <p>Return to ShareBoost, paste the code into the AppState field, and start boosting.</p>
+    <div class="illu"><img src="https://i.imgur.com/cyrZNZ5.jpeg"></div>
+  </section>
+
+  <section class="card">
+    <h2><i class="fa-solid fa-video"></i> Video Tutorial</h2>
+    <p>Follow the full visual guide below for easier setup.</p>
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/0OvIWpM2Hu0" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <footer>POWERED BY YASIS • 2026</footer>
+</main>
+
+</body>
+</html>
