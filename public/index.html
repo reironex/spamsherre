@@ -1,112 +1,82 @@
-const express = require('express');
-const axios = require('axios');
-const path = require('path');
-const bodyParser = require('body-parser');
-const app = express();
-
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-const total = new Map();      
-const timers = new Map();     
-const sessionOrder = []; // Dito natin ise-save ang pagkakasunod-sunod
-
-app.get('/total', (req, res) => {
-  // I-map ang data base sa sessionOrder para steady ang pwesto
-  const data = sessionOrder.map((key, index) => {
-    const link = total.get(key);
-    return {
-      session: index + 1,
-      id: link.id,
-      count: link.count,
-      target: link.target,
-      status: link.status
-    };
-  });
-  res.json(data);
-});
-
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-
-app.post('/api/submit', async (req, res) => {
-  const { cookie, url, amount, interval } = req.body;
-  if (!cookie || !url || !amount || !interval) return res.status(400).json({ error: 'Missing fields' });
-
-  try {
-    const cookies = await convertCookie(cookie);
-    const id = await getPostID(url);
-    const accessToken = await getAccessToken(cookies);
-
-    if (!id || !accessToken) throw new Error("Invalid Link or AppState");
-
-    // UNIQUE KEY para bawat submit ay may sariling card
-    const sessionKey = `${id}_${Date.now()}`; 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShareBoost ▸</title>
+  <style>
+    :root { --neon: #ff4ecd; --bg: #0d0d12; --panel: #15151f; }
+    body { font-family: monospace; background: var(--bg); color: #eee; padding: 20px; text-align: center; }
+    .box { max-width: 450px; margin: 20px auto; background: var(--panel); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,78,205,0.2); }
+    h1 { color: var(--neon); text-shadow: 0 0 10px var(--neon); font-size: 24px; }
+    input { width: 100%; padding: 12px; margin: 10px 0; background: #0a0a0f; border: 1px solid #333; color: #fff; box-sizing: border-box; border-radius: 4px; outline: none; }
+    button { width: 48%; padding: 12px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; transition: 0.3s; }
+    #start { background: var(--neon); color: white; }
+    #stop { background: #222; color: #888; }
     
-    total.set(sessionKey, { id, count: 0, target: amount, status: "running" });
-    sessionOrder.push(sessionKey); // I-track ang pwesto
-    
-    const timer = setInterval(async () => {
-      const session = total.get(sessionKey);
-      if (!session || session.count >= amount) {
-        clearInterval(timers.get(sessionKey));
-        if(session) session.status = "completed";
-        return;
-      }
+    /* Steady Log Cards */
+    .stat-card { text-align: left; background: #0a0a0f; padding: 15px; border-left: 4px solid var(--neon); margin-top: 15px; border-radius: 4px; }
+    .progress { height: 6px; background: #222; margin-top: 10px; border-radius: 10px; overflow: hidden; }
+    .bar { height: 100%; background: var(--neon); transition: 0.5s ease-in-out; }
+    .status { float: right; font-size: 10px; padding: 2px 6px; border-radius: 3px; background: var(--neon); color: #000; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>﹌ ShareBoost ▸</h1>
+  <div class="box">
+    <input type="text" id="cookie" placeholder="AppState JSON / Cookie">
+    <input type="text" id="url" placeholder="Facebook Link">
+    <input type="number" id="amount" placeholder="Limit" value="1000">
+    <input type="number" id="interval" placeholder="Interval (ms)" value="2000">
+    <div style="display:flex; gap:10px;">
+      <button id="start" onclick="submit()">EXECUTE</button>
+      <button id="stop" onclick="stop()">KILL</button>
+    </div>
+  </div>
 
+  <div id="status-container" class="box" style="display:none;">
+    <div id="stats-list"></div>
+  </div>
+
+  <script>
+    async function submit() {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cookie: document.getElementById('cookie').value,
+          url: document.getElementById('url').value,
+          amount: document.getElementById('amount').value,
+          interval: document.getElementById('interval').value
+        })
+      });
+      if(res.ok) document.getElementById('status-container').style.display = 'block';
+    }
+
+    async function stop() { 
+      await fetch('/api/stop', { method: 'POST' }); 
+      location.reload(); 
+    }
+
+    setInterval(async () => {
       try {
-        await axios.post(
-          `https://graph.facebook.com/v18.0/me/feed?link=https://facebook.com/${id}&published=0&access_token=${accessToken}`,
-          {},
-          { headers: { 
-              'cookie': cookies,
-              'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Pixel 5)'
-            } 
-          }
-        );
-        session.count++;
-      } catch (error) {
-        session.status = "failed";
-        clearInterval(timers.get(sessionKey));
-      }
-    }, interval); 
-
-    timers.set(sessionKey, timer);
-    res.status(200).json({ status: 200, id });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/stop', (req, res) => {
-  timers.forEach(t => clearInterval(t));
-  timers.clear();
-  total.clear();
-  sessionOrder.length = 0; 
-  res.json({ status: 200, message: 'Stopped all' });
-});
-
-async function getPostID(url) {
-  try {
-    const res = await axios.post('https://id.traodoisub.com/api.php', `link=${encodeURIComponent(url)}`, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    return res.data.id;
-  } catch { return null; }
-}
-
-async function getAccessToken(cookie) {
-  try {
-    const res = await axios.get('https://business.facebook.com/content_management', { headers: { cookie } });
-    return res.data.match(/"accessToken":\s*"([^"]+)"/)[1];
-  } catch { return null; }
-}
-
-async function convertCookie(cookie) {
-  try {
-    const json = JSON.parse(cookie);
-    return json.map(c => `${c.key}=${c.value}`).join('; ');
-  } catch { return cookie; }
-}
-
-app.listen(5000, () => console.log("Server running on port 5000"));
+        const res = await fetch('/total');
+        const data = await res.json();
+        if(data.length > 0) {
+          document.getElementById('status-container').style.display = 'block';
+          // Steady rendering: hindi nagbabago ang order
+          document.getElementById('stats-list').innerHTML = data.map(item => `
+            <div class="stat-card" style="border-color: ${item.status === 'failed' ? '#ff4444' : (item.status === 'completed' ? '#00ff88' : '#ff4ecd')}">
+              <span class="status">${item.status.toUpperCase()}</span>
+              <b>SESSION #${item.session}</b><br>
+              <small style="color:#777">ID: ${item.id}</small><br>
+              <div style="margin-top:5px;">SHARED: ${item.count} / ${item.target}</div>
+              <div class="progress"><div class="bar" style="width:${(item.count/item.target)*100}%"></div></div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {}
+    }, 2000);
+  </script>
+</body>
+</html>
