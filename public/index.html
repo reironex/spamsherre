@@ -3,54 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShareBoost ▸</title>
+  <title>ShareBoost Premium ▸</title>
   <style>
-    :root { --neon: #ff4ecd; --bg: #0d0d12; --panel: #15151f; }
-    body { font-family: monospace; background: var(--bg); color: #eee; padding: 20px; text-align: center; }
-    .box { max-width: 450px; margin: 20px auto; background: var(--panel); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,78,205,0.2); }
-    h1 { color: var(--neon); text-shadow: 0 0 10px var(--neon); font-size: 24px; }
-    input { width: 100%; padding: 12px; margin: 10px 0; background: #0a0a0f; border: 1px solid #333; color: #fff; box-sizing: border-box; border-radius: 4px; outline: none; }
-    button { width: 48%; padding: 12px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; transition: 0.3s; }
-    #start { background: var(--neon); color: white; }
-    #stop { background: #222; color: #888; }
+    :root { --neon: #ff4ecd; --bg: #08080c; --panel: #11111d; --glass: rgba(255, 255, 255, 0.03); }
+    body { font-family: 'Inter', monospace; background: var(--bg); color: #eee; padding: 20px; text-align: center; margin: 0; }
     
-    /* Steady Log Cards */
-    .stat-card { text-align: left; background: #0a0a0f; padding: 15px; border-left: 4px solid var(--neon); margin-top: 15px; border-radius: 4px; }
-    .progress { height: 6px; background: #222; margin-top: 10px; border-radius: 10px; overflow: hidden; }
-    .bar { height: 100%; background: var(--neon); transition: 0.5s ease-in-out; }
-    .status { float: right; font-size: 10px; padding: 2px 6px; border-radius: 3px; background: var(--neon); color: #000; font-weight: bold; }
+    .header-container { margin: 30px 0; }
+    h1 { color: var(--neon); text-shadow: 0 0 20px var(--neon); letter-spacing: 3px; font-size: 32px; margin: 0; }
+    .subtitle { color: #555; font-size: 12px; text-transform: uppercase; margin-top: 5px; }
+
+    .box { max-width: 480px; margin: 0 auto 20px; background: var(--panel); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,78,205,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+    
+    input { width: 100%; padding: 15px; margin: 10px 0; background: #050508; border: 1px solid #222; color: #fff; box-sizing: border-box; border-radius: 8px; transition: 0.3s; font-family: monospace; }
+    input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(255,78,205,0.2); outline: none; }
+    
+    .btn-group { display: flex; gap: 15px; margin-top: 15px; }
+    button { flex: 1; padding: 15px; cursor: pointer; font-weight: 800; border: none; border-radius: 8px; transition: 0.3s; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    
+    #start { background: linear-gradient(45deg, #ff4ecd, #9d50bb); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+    #start:disabled { opacity: 0.7; cursor: not-allowed; }
+    #stop { background: #1a1a2a; color: #888; }
+    #stop:hover { background: #252535; color: #fff; }
+
+    /* Loading Spinner */
+    .spinner { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Angas Logs */
+    .stat-card { text-align: left; background: var(--glass); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-top: 15px; position: relative; backdrop-filter: blur(10px); }
+    .session-badge { position: absolute; top: 15px; right: 15px; font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    
+    .status-running { background: rgba(255, 234, 0, 0.1); color: #ffea00; border: 1px solid rgba(255, 234, 0, 0.2); }
+    .status-completed { background: rgba(0, 255, 136, 0.1); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.2); }
+    .status-failed { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.2); }
+
+    .id-info { font-size: 14px; font-weight: 600; color: var(--neon); }
+    .count-info { font-size: 20px; font-weight: 800; margin: 10px 0; }
+    .count-info small { font-size: 12px; color: #555; font-weight: normal; }
+
+    .progress-bar { height: 4px; background: #000; border-radius: 10px; margin-top: 15px; overflow: hidden; }
+    .fill { height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
   </style>
 </head>
 <body>
-  <h1>﹌ ShareBoost ▸</h1>
+  <div class="header-container">
+    <h1>﹌ ShareBoost ▸</h1>
+    <div class="subtitle">Next Generation Sharing Tool</div>
+  </div>
+
   <div class="box">
     <input type="text" id="cookie" placeholder="AppState JSON / Cookie">
-    <input type="text" id="url" placeholder="Facebook Link">
+    <input type="text" id="url" placeholder="Target Post Link">
     <input type="number" id="amount" placeholder="Limit" value="1000">
-    <input type="number" id="interval" placeholder="Interval (ms)" value="2000">
-    <div style="display:flex; gap:10px;">
-      <button id="start" onclick="submit()">EXECUTE</button>
+    <input type="number" id="interval" placeholder="Delay (ms)" value="2000">
+    <div class="btn-group">
+      <button id="start" onclick="submit()">
+        <div class="spinner" id="loader"></div>
+        <span id="btnText">EXECUTE</span>
+      </button>
       <button id="stop" onclick="stop()">KILL</button>
     </div>
   </div>
 
-  <div id="status-container" class="box" style="display:none;">
+  <div id="status-container" style="max-width:480px; margin: 0 auto; display:none;">
     <div id="stats-list"></div>
   </div>
 
   <script>
     async function submit() {
-      const res = await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cookie: document.getElementById('cookie').value,
-          url: document.getElementById('url').value,
-          amount: document.getElementById('amount').value,
-          interval: document.getElementById('interval').value
-        })
-      });
-      if(res.ok) document.getElementById('status-container').style.display = 'block';
+      const btn = document.getElementById('start');
+      const loader = document.getElementById('loader');
+      const text = document.getElementById('btnText');
+      
+      // Loading Animation Start
+      btn.disabled = true;
+      loader.style.display = 'block';
+      text.innerText = "PROCESSING...";
+
+      try {
+        const res = await fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cookie: document.getElementById('cookie').value,
+            url: document.getElementById('url').value,
+            amount: document.getElementById('amount').value,
+            interval: document.getElementById('interval').value
+          })
+        });
+        if(res.ok) document.getElementById('status-container').style.display = 'block';
+        else { const err = await res.json(); alert(err.error); }
+      } finally {
+        // Loading Animation Stop
+        btn.disabled = false;
+        loader.style.display = 'none';
+        text.innerText = "EXECUTE";
+      }
     }
 
     async function stop() { 
@@ -64,19 +112,20 @@
         const data = await res.json();
         if(data.length > 0) {
           document.getElementById('status-container').style.display = 'block';
-          // Steady rendering: hindi nagbabago ang order
+          // Steady logs base sa sessionOrder
           document.getElementById('stats-list').innerHTML = data.map(item => `
-            <div class="stat-card" style="border-color: ${item.status === 'failed' ? '#ff4444' : (item.status === 'completed' ? '#00ff88' : '#ff4ecd')}">
-              <span class="status">${item.status.toUpperCase()}</span>
-              <b>SESSION #${item.session}</b><br>
-              <small style="color:#777">ID: ${item.id}</small><br>
-              <div style="margin-top:5px;">SHARED: ${item.count} / ${item.target}</div>
-              <div class="progress"><div class="bar" style="width:${(item.count/item.target)*100}%"></div></div>
+            <div class="stat-card">
+              <span class="session-badge status-${item.status}">${item.status}</span>
+              <div class="id-info">ID: ${item.id}</div>
+              <div class="count-info">${item.count} <small>/ ${item.target}</small></div>
+              <div class="progress-bar">
+                <div class="fill" style="width:${(item.count/item.target)*100}%"></div>
+              </div>
             </div>
           `).join('');
         }
       } catch (e) {}
-    }, 2000);
+    }, 1500);
   </script>
 </body>
 </html>
