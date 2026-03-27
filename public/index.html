@@ -5,57 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ShareBoost ▸</title>
   <style>
-    :root { --neon: #ff4ecd; --bg: #0d0d12; --panel: #15151f; --sub: #777; }
-    body { font-family: 'Segoe UI', monospace; background: var(--bg); color: #eee; padding: 20px; text-align: center; margin: 0; }
+    :root { --neon: #ff4ecd; --bg: #0d0d12; --panel: #15151f; }
+    body { font-family: monospace; background: var(--bg); color: #eee; padding: 20px; text-align: center; }
+    .box { max-width: 450px; margin: 20px auto; background: var(--panel); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,78,205,0.2); }
+    h1 { color: var(--neon); text-shadow: 0 0 10px var(--neon); font-size: 24px; }
+    input { width: 100%; padding: 12px; margin: 10px 0; background: #0a0a0f; border: 1px solid #333; color: #fff; box-sizing: border-box; border-radius: 4px; outline: none; }
+    button { width: 48%; padding: 12px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; transition: 0.3s; }
+    #start { background: var(--neon); color: white; }
+    #stop { background: #222; color: #888; }
     
-    /* Header Animation */
-    h1 { color: var(--neon); text-shadow: 0 0 15px var(--neon); letter-spacing: 2px; margin-bottom: 30px; font-size: 28px; }
-    .wave { color: var(--neon); animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
-    .box { max-width: 480px; margin: 0 auto 20px; background: var(--panel); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,78,205,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    
-    input { width: 100%; padding: 14px; margin: 12px 0; background: #0a0a0f; border: 1px solid #333; color: #fff; box-sizing: border-box; border-radius: 6px; font-family: monospace; transition: 0.3s; }
-    input:focus { border-color: var(--neon); outline: none; box-shadow: 0 0 8px rgba(255,78,205,0.2); }
-    
-    .btn-group { display: flex; gap: 12px; margin-top: 10px; }
-    button { flex: 1; padding: 14px; cursor: pointer; font-weight: bold; border: none; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-    
-    #start { background: var(--neon); color: white; box-shadow: 0 4px 15px rgba(255,78,205,0.3); }
-    #start:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,78,205,0.4); }
-    #stop { background: #2a2a3a; color: #bbb; }
-    #stop:hover { background: #3a3a4a; color: #fff; }
-
-    /* Modern Log Cards */
-    #status-container { border: none; background: transparent; padding: 0; }
-    .stat-card { text-align: left; background: var(--panel); padding: 18px; border-radius: 10px; border-left: 5px solid var(--neon); margin-bottom: 15px; position: relative; animation: slideIn 0.4s ease-out; }
-    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .session-tag { background: rgba(255,78,205,0.1); color: var(--neon); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-    .status-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: bold; }
-    .status-running { background: #1a1a00; color: #ffea00; border: 1px solid #444400; }
-    .status-completed { background: #001a00; color: #00ff88; border: 1px solid #004400; }
-    .status-failed { background: #1a0000; color: #ff4444; border: 1px solid #440000; }
-
-    .id-text { font-size: 14px; color: #fff; font-weight: bold; margin: 5px 0; display: block; }
-    .count-text { font-size: 12px; color: var(--sub); }
-    
-    .progress-wrapper { background: #0a0a0f; height: 8px; border-radius: 10px; margin-top: 12px; overflow: hidden; }
-    .bar { height: 100%; background: linear-gradient(90deg, var(--neon), #ff8edb); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px var(--neon); }
+    /* Steady Log Cards */
+    .stat-card { text-align: left; background: #0a0a0f; padding: 15px; border-left: 4px solid var(--neon); margin-top: 15px; border-radius: 4px; }
+    .progress { height: 6px; background: #222; margin-top: 10px; border-radius: 10px; overflow: hidden; }
+    .bar { height: 100%; background: var(--neon); transition: 0.5s ease-in-out; }
+    .status { float: right; font-size: 10px; padding: 2px 6px; border-radius: 3px; background: var(--neon); color: #000; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1><span class="wave">﹌</span> ShareBoost ▸</h1>
-  
+  <h1>﹌ ShareBoost ▸</h1>
   <div class="box">
     <input type="text" id="cookie" placeholder="AppState JSON / Cookie">
     <input type="text" id="url" placeholder="Facebook Link">
-    <input type="number" id="amount" placeholder="Limit (e.g. 1000)" value="1000">
+    <input type="number" id="amount" placeholder="Limit" value="1000">
     <input type="number" id="interval" placeholder="Interval (ms)" value="2000">
-    <div class="btn-group">
-      <button id="start" onclick="submit()">Execute Boost</button>
-      <button id="stop" onclick="stop()">Kill All</button>
+    <div style="display:flex; gap:10px;">
+      <button id="start" onclick="submit()">EXECUTE</button>
+      <button id="stop" onclick="stop()">KILL</button>
     </div>
   </div>
 
@@ -65,7 +40,6 @@
 
   <script>
     async function submit() {
-      // Pinanatili ang original fetch structure mo
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,45 +50,33 @@
           interval: document.getElementById('interval').value
         })
       });
-      if(res.ok) {
-        document.getElementById('status-container').style.display = 'block';
-      } else {
-        const errData = await res.json();
-        alert("Request failed: " + (errData.error || "Check fields"));
-      }
+      if(res.ok) document.getElementById('status-container').style.display = 'block';
     }
 
     async function stop() { 
       await fetch('/api/stop', { method: 'POST' }); 
-      location.reload();
+      location.reload(); 
     }
 
     setInterval(async () => {
-      const res = await fetch('/total');
-      const data = await res.json();
-      if(data.length > 0) {
-        document.getElementById('status-container').style.display = 'block';
-        document.getElementById('stats-list').innerHTML = data.map(item => {
-          const statusClass = `status-${item.status}`;
-          const borderColor = item.status === 'failed' ? '#ff4444' : (item.status === 'completed' ? '#00ff88' : '#ff4ecd');
-          const percent = (item.count / item.target) * 100;
-          
-          return `
-            <div class="stat-card" style="border-left-color: ${borderColor}">
-              <div class="card-header">
-                <span class="session-tag">SESSION #${item.session}</span>
-                <span class="status-badge ${statusClass}">${item.status.toUpperCase()}</span>
-              </div>
-              <span class="id-text">▸ Post ID: ${item.id}</span>
-              <div class="count-text">Processed: <b>${item.count.toLocaleString()}</b> / ${item.target.toLocaleString()} shares</div>
-              <div class="progress-wrapper">
-                <div class="bar" style="width: ${percent}%; background-color: ${borderColor}"></div>
-              </div>
+      try {
+        const res = await fetch('/total');
+        const data = await res.json();
+        if(data.length > 0) {
+          document.getElementById('status-container').style.display = 'block';
+          // Steady rendering: hindi nagbabago ang order
+          document.getElementById('stats-list').innerHTML = data.map(item => `
+            <div class="stat-card" style="border-color: ${item.status === 'failed' ? '#ff4444' : (item.status === 'completed' ? '#00ff88' : '#ff4ecd')}">
+              <span class="status">${item.status.toUpperCase()}</span>
+              <b>SESSION #${item.session}</b><br>
+              <small style="color:#777">ID: ${item.id}</small><br>
+              <div style="margin-top:5px;">SHARED: ${item.count} / ${item.target}</div>
+              <div class="progress"><div class="bar" style="width:${(item.count/item.target)*100}%"></div></div>
             </div>
-          `;
-        }).join('');
-      }
-    }, 1500);
+          `).join('');
+        }
+      } catch (e) {}
+    }, 2000);
   </script>
 </body>
 </html>
