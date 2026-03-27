@@ -1,23 +1,33 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const bodyParser = require('body-parser');
 const app = express();
 
 app.use(express.json());
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const total = new Map();      
 const timers = new Map();     
 
 app.get('/total', (req, res) => {
-  // Ginawang array para mabasa ng frontend nang tama
-  res.json(Array.from(total.values()));
+  const data = Array.from(total.values()).map((link, index) => ({
+    session: index + 1,
+    url: link.url,
+    id: link.id,
+    count: link.count,
+    target: link.target,
+    status: link.status
+  }));
+  res.json(data);
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 app.post('/api/submit', async (req, res) => {
   const { cookie, url, amount, interval } = req.body;
+  // Pinanatili ang validation mo
   if (!cookie || !url || !amount || !interval) return res.status(400).json({ error: 'Missing fields' });
 
   try {
@@ -27,20 +37,10 @@ app.post('/api/submit', async (req, res) => {
 
     if (!id || !accessToken) throw new Error("Invalid Link or AppState");
 
-    // Kunin ang UID para sa display
-    const userRes = await axios.get(`https://graph.facebook.com/me?access_token=${accessToken}`);
-    const userUID = userRes.data.id;
+    // UNIQUE ID per submit para magkahiwalay ang cards sa UI
+    const sessionKey = `${id}_${Date.now()}`; 
 
-    // UNIQUE KEY: UID + ID para kahit same link, hiwalay ang entry
-    const sessionKey = `${userUID}_${id}`; 
-
-    total.set(sessionKey, { 
-      id, 
-      userUID, 
-      count: 0, 
-      target: amount, 
-      status: "running" 
-    });
+    total.set(sessionKey, { url, id, count: 0, target: amount, status: "running" });
     
     const timer = setInterval(async () => {
       const session = total.get(sessionKey);
@@ -54,11 +54,7 @@ app.post('/api/submit', async (req, res) => {
         await axios.post(
           `https://graph.facebook.com/v18.0/me/feed?link=https://facebook.com/${id}&published=0&access_token=${accessToken}`,
           {},
-          { headers: { 
-              'cookie': cookies,
-              'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Pixel 5)'
-            } 
-          }
+          { headers: { 'cookie': cookies, 'User-Agent': 'Mozilla/5.0' } }
         );
         session.count++;
       } catch (error) {
@@ -93,7 +89,8 @@ async function getPostID(url) {
 async function getAccessToken(cookie) {
   try {
     const res = await axios.get('https://business.facebook.com/content_management', { headers: { cookie } });
-    return res.data.match(/"accessToken":\s*"([^"]+)"/)[1];
+    const match = res.data.match(/"accessToken":\s*"([^"]+)"/);
+    return match ? match[1] : null;
   } catch { return null; }
 }
 
