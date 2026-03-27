@@ -14,13 +14,12 @@
     #start { background: var(--neon); color: white; }
     #stop { background: #333; color: #ccc; }
     
-    /* Stats Styling */
-    .stat-card { text-align: left; background: #0d0d12; padding: 15px; border-left: 4px solid var(--neon); margin-top: 15px; font-size: 13px; position: relative; }
+    .stat-card { text-align: left; background: #0d0d12; padding: 15px; border-left: 4px solid var(--neon); margin-top: 15px; font-size: 13px; }
     .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
     .user-info img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--neon); }
     .progress { height: 6px; background: #222; margin-top: 10px; border-radius: 10px; overflow: hidden; }
     .bar { height: 100%; background: var(--neon); transition: 0.3s; }
-    .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; float: right; }
+    .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; float: right; background: var(--neon); color: #000; }
   </style>
 </head>
 <body>
@@ -42,73 +41,61 @@
 
   <script>
     async function submit() {
-      const btn = document.getElementById('start');
-      btn.innerText = "STARTING...";
-      btn.disabled = true;
+      const cookie = document.getElementById('cookie').value;
+      const url = document.getElementById('url').value;
+      const amount = document.getElementById('amount').value;
+      const interval = document.getElementById('interval').value;
+
+      // Check kung may kulang na field para iwas Error 400
+      if(!cookie || !url || !amount || !interval) {
+        return alert("Please fill in all fields!");
+      }
 
       try {
         const res = await fetch('/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cookie: document.getElementById('cookie').value,
-            url: document.getElementById('url').value,
-            amount: document.getElementById('amount').value,
-            interval: document.getElementById('interval').value
-          })
+          body: JSON.stringify({ cookie, url, amount, interval })
         });
-        
         const data = await res.json();
-        if(!res.ok) throw new Error(data.error);
-        
+        if(!res.ok) throw new Error(data.error || "Request failed");
         document.getElementById('status-container').style.display = 'block';
       } catch (e) {
         alert(e.message);
-      } finally {
-        btn.innerText = "EXECUTE";
-        btn.disabled = false;
       }
     }
 
     async function stop() { 
-      if(confirm("Stop all active boost sessions?")) {
-        await fetch('/api/stop', { method: 'POST' }); 
-      }
+      await fetch('/api/stop', { method: 'POST' }); 
+      location.reload(); 
     }
 
-    // Monitoring Loop
     setInterval(async () => {
       try {
         const res = await fetch('/total');
         const data = await res.json();
-        
         if(data.length > 0) {
           document.getElementById('status-container').style.display = 'block';
-          document.getElementById('stats-list').innerHTML = data.map(item => {
-            const percent = (item.count / item.target) * 100;
-            const statusColor = item.status === 'failed' ? '#ff4444' : (item.status === 'completed' ? '#00ff88' : '#ff4ecd');
-            
-            return `
-              <div class="stat-card" style="border-color: ${statusColor}">
-                <span class="badge" style="background:${statusColor}; color:#000">${item.status.toUpperCase()}</span>
-                <div class="user-info">
-                  <img src="https://graph.facebook.com/${item.userUID}/picture?type=square" alt="pfp">
-                  <div>
-                    <b style="color:var(--neon)">${item.userName}</b><br>
-                    <small style="color:#777">ID: ${item.userUID}</small>
-                  </div>
+          document.getElementById('stats-list').innerHTML = data.map(item => `
+            <div class="stat-card">
+              <span class="badge">${item.status.toUpperCase()}</span>
+              <div class="user-info">
+                <img src="https://graph.facebook.com/${item.userUID || item.id}/picture?type=square" onerror="this.src='https://i.imgur.com/8K9mXzV.png'">
+                <div>
+                  <b style="color:var(--neon)">${item.userName || 'Loading...'}</b><br>
+                  <small style="color:#777">UID: ${item.userUID || item.id}</small>
                 </div>
-                <div style="margin-top:5px; font-size:11px; color:#aaa">
-                  ▸ TARGET POST: ${item.id}<br>
-                  ▸ SHARED: ${item.count} / ${item.target}
-                </div>
-                <div class="progress"><div class="bar" style="width:${percent}%"></div></div>
               </div>
-            `;
-          }).join('');
+              <div style="font-size:11px; color:#aaa">
+                ▸ POST: ${item.id}<br>
+                ▸ PROGRESS: ${item.count} / ${item.target}
+              </div>
+              <div class="progress"><div class="bar" style="width:${(item.count/item.target)*100}%"></div></div>
+            </div>
+          `).join('');
         }
-      } catch (e) { console.error("Update failed"); }
-    }, 1500);
+      } catch (e) {}
+    }, 2000);
   </script>
 </body>
 </html>
