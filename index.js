@@ -4,41 +4,18 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const app = express();
 
-const ADMIN_USER = "admin";
-const ADMIN_PASS = "supersecret123"; 
-
-let announcement = { message: "", updatedAt: null };
-
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/api/announcement', (req, res) => res.json(announcement));
-app.post('/api/announcement', (req, res) => {
-  const { username, password, message } = req.body;
-  if (username !== ADMIN_USER || password !== ADMIN_PASS) return res.status(401).json({ error: "Unauthorized" });
-  announcement = { message, updatedAt: Date.now() };
-  res.json({ status: 200, message: "Announcement updated" });
-});
-
-const allShares = []; 
 const total = new Map();      
 const timers = new Map();     
 
 app.get('/total', (req, res) => {
-  const data = Array.from(total.values()).map((link, index) => ({
-    session: index + 1,
-    url: link.url,
-    id: link.id,
-    count: link.count,
-    target: link.target,
-    startTime: link.startTime,
-    status: link.status
-  }));
+  const data = Array.from(total.values());
   res.json(data);
 });
 
-app.get('/shares', (req, res) => res.json(allShares));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 app.post('/api/submit', async (req, res) => {
@@ -52,13 +29,28 @@ app.post('/api/submit', async (req, res) => {
 
     if (!id || !accessToken) throw new Error("Invalid Link or AppState");
 
-    total.set(id, { url, id, count: 0, target: amount, startTime: Date.now(), status: "running" });
+    // Kunin ang User Info (Name at UID)
+    const userRes = await axios.get(`https://graph.facebook.com/me?access_token=${accessToken}`);
+    const userName = userRes.data.name;
+    const userUID = userRes.data.id;
+
+    // Gamitin ang accessToken bilang UNIQUE KEY para hindi mag-merge ang same links
+    const sessionKey = accessToken; 
+
+    total.set(sessionKey, { 
+      url, 
+      id, 
+      userName, 
+      userUID, 
+      count: 0, 
+      target: amount, 
+      status: "running" 
+    });
     
-    // START SHARING LOGIC
     const timer = setInterval(async () => {
-      const session = total.get(id);
+      const session = total.get(sessionKey);
       if (!session || session.count >= amount) {
-        clearInterval(timers.get(id));
+        clearInterval(timers.get(sessionKey));
         if(session) session.status = "completed";
         return;
       }
@@ -67,22 +59,16 @@ app.post('/api/submit', async (req, res) => {
         await axios.post(
           `https://graph.facebook.com/v18.0/me/feed?link=https://facebook.com/${id}&published=0&access_token=${accessToken}`,
           {},
-          { headers: { 
-              'cookie': cookies,
-              'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile'
-            } 
-          }
+          { headers: { 'cookie': cookies, 'User-Agent': 'Mozilla/5.0' } }
         );
         session.count++;
       } catch (error) {
-        console.log(`[ERROR] ID ${id}: ${error.response?.data?.error?.message || error.message}`);
         session.status = "failed";
-        clearInterval(timers.get(id));
+        clearInterval(timers.get(sessionKey));
       }
     }, interval); 
 
-    timers.set(id, timer);
-    allShares.push({ id, url, time: Date.now() });
+    timers.set(sessionKey, timer);
     res.status(200).json({ status: 200, id });
   } catch (err) {
     res.status(500).json({ error: err.message });
