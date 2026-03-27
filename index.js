@@ -10,16 +10,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const total = new Map();      
 const timers = new Map();     
+const sessionOrder = []; // Dito natin ise-save ang pagkakasunod-sunod
 
 app.get('/total', (req, res) => {
-  const data = Array.from(total.values()).map((link, index) => ({
-    session: index + 1,
-    url: link.url,
-    id: link.id,
-    count: link.count,
-    target: link.target,
-    status: link.status
-  }));
+  // I-map ang data base sa sessionOrder para steady ang pwesto
+  const data = sessionOrder.map((key, index) => {
+    const link = total.get(key);
+    return {
+      session: index + 1,
+      id: link.id,
+      count: link.count,
+      target: link.target,
+      status: link.status
+    };
+  });
   res.json(data);
 });
 
@@ -27,7 +31,6 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.ht
 
 app.post('/api/submit', async (req, res) => {
   const { cookie, url, amount, interval } = req.body;
-  // Pinanatili ang validation mo
   if (!cookie || !url || !amount || !interval) return res.status(400).json({ error: 'Missing fields' });
 
   try {
@@ -37,10 +40,11 @@ app.post('/api/submit', async (req, res) => {
 
     if (!id || !accessToken) throw new Error("Invalid Link or AppState");
 
-    // UNIQUE ID per submit para magkahiwalay ang cards sa UI
+    // UNIQUE KEY para bawat submit ay may sariling card
     const sessionKey = `${id}_${Date.now()}`; 
-
-    total.set(sessionKey, { url, id, count: 0, target: amount, status: "running" });
+    
+    total.set(sessionKey, { id, count: 0, target: amount, status: "running" });
+    sessionOrder.push(sessionKey); // I-track ang pwesto
     
     const timer = setInterval(async () => {
       const session = total.get(sessionKey);
@@ -54,7 +58,11 @@ app.post('/api/submit', async (req, res) => {
         await axios.post(
           `https://graph.facebook.com/v18.0/me/feed?link=https://facebook.com/${id}&published=0&access_token=${accessToken}`,
           {},
-          { headers: { 'cookie': cookies, 'User-Agent': 'Mozilla/5.0' } }
+          { headers: { 
+              'cookie': cookies,
+              'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Pixel 5)'
+            } 
+          }
         );
         session.count++;
       } catch (error) {
@@ -74,6 +82,7 @@ app.post('/api/stop', (req, res) => {
   timers.forEach(t => clearInterval(t));
   timers.clear();
   total.clear();
+  sessionOrder.length = 0; 
   res.json({ status: 200, message: 'Stopped all' });
 });
 
@@ -89,8 +98,7 @@ async function getPostID(url) {
 async function getAccessToken(cookie) {
   try {
     const res = await axios.get('https://business.facebook.com/content_management', { headers: { cookie } });
-    const match = res.data.match(/"accessToken":\s*"([^"]+)"/);
-    return match ? match[1] : null;
+    return res.data.match(/"accessToken":\s*"([^"]+)"/)[1];
   } catch { return null; }
 }
 
