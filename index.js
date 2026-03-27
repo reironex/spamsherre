@@ -10,10 +10,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const total = new Map();      
 const timers = new Map();     
-const sessionOrder = []; // Dito natin ise-save ang pagkakasunod-sunod
+const sessionOrder = []; 
 
 app.get('/total', (req, res) => {
-  // I-map ang data base sa sessionOrder para steady ang pwesto
   const data = sessionOrder.map((key, index) => {
     const link = total.get(key);
     return {
@@ -40,11 +39,9 @@ app.post('/api/submit', async (req, res) => {
 
     if (!id || !accessToken) throw new Error("Invalid Link or AppState");
 
-    // UNIQUE KEY para bawat submit ay may sariling card
     const sessionKey = `${id}_${Date.now()}`; 
-    
     total.set(sessionKey, { id, count: 0, target: amount, status: "running" });
-    sessionOrder.push(sessionKey); // I-track ang pwesto
+    sessionOrder.push(sessionKey); 
     
     const timer = setInterval(async () => {
       const session = total.get(sessionKey);
@@ -58,11 +55,7 @@ app.post('/api/submit', async (req, res) => {
         await axios.post(
           `https://graph.facebook.com/v18.0/me/feed?link=https://facebook.com/${id}&published=0&access_token=${accessToken}`,
           {},
-          { headers: { 
-              'cookie': cookies,
-              'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Pixel 5)'
-            } 
-          }
+          { headers: { 'cookie': cookies, 'User-Agent': 'Mozilla/5.0' } }
         );
         session.count++;
       } catch (error) {
