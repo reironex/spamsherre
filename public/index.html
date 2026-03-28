@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shir Bus</title>
+  <title>ShareBoost</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
     :root { --neon: #00ff88; --bg: #080c0a; --panel: #111d16; }
@@ -29,14 +29,21 @@
 
     #msg { font-size: 12px; color: #ff4444; margin-bottom: 10px; display: none; font-weight: bold; }
 
-    #status-container { max-width: 480px; margin: 20px auto; max-height: 400px; overflow-y: auto; padding-right: 5px; }
+    #status-container { 
+      max-width: 480px; 
+      margin: 20px auto; 
+      max-height: 450px; 
+      overflow-y: auto; 
+      padding-right: 5px; 
+      min-height: 50px; 
+    }
+    
     #status-container::-webkit-scrollbar { width: 4px; }
     #status-container::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
 
-    .stat-card { text-align: left; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; position: relative; animation: fadeIn 0.3s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .stat-card { text-align: left; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; position: relative; }
 
-    .session-badge { position: absolute; top: 12px; right: 12px; font-size: 9px; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+    .session-badge { position: absolute; top: 12px; right: 12px; font-size: 9px; padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
     .status-running { background: #2b3300; color: #eaff00; }
     .status-completed { background: #002b16; color: #00ff88; }
     .status-failed { background: #2b0000; color: #ff4444; }
@@ -44,18 +51,18 @@
     .del-btn { position: absolute; bottom: 12px; right: 12px; background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; display: none; }
     .stat-card:hover .del-btn { display: block; }
 
-    .id-info { font-size: 12px; color: #555; margin-bottom: 5px; }
+    .id-info { font-size: 11px; color: #555; margin-bottom: 5px; }
     .count-info { font-size: 18px; font-weight: 800; color: #eee; }
     .progress-bar { height: 4px; background: #000; border-radius: 10px; margin-top: 10px; overflow: hidden; }
-    .fill { height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: 0.5s ease-in-out; }
+    .fill { height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: 0.4s ease-in-out; }
 
-    .tutorial-link { margin-top: 15px; display: block; text-decoration: none; color: var(--neon); font-size: 12px; font-weight: bold; opacity: 0.7; transition: 0.3s; }
+    .tutorial-link { margin-top: 15px; display: block; text-decoration: none; color: var(--neon); font-size: 11px; font-weight: bold; opacity: 0.6; transition: 0.3s; }
     .tutorial-link:hover { opacity: 1; text-shadow: 0 0 5px var(--neon); }
   </style>
 </head>
 <body>
   <h1>ShareBoost</h1>
-  <div class="subtitle">mabilis pa sa relasyon noyo</div>
+  <div class="subtitle">mabilis pa sa relasyon niyo</div>
 
   <div class="box">
     <div id="msg">⚠ PLEASE FILL ALL FIELDS!</div>
@@ -108,7 +115,10 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cookie, url, amount, interval })
         });
-        if(!res.ok) { const err = await res.json(); alert(err.error); }
+        if(!res.ok) { 
+          const err = await res.json(); 
+          alert(err.error); 
+        }
       } finally {
         btn.disabled = false; loader.style.display = 'none'; text.innerText = "START";
       }
@@ -133,8 +143,10 @@
       try {
         const res = await fetch('/total');
         const data = await res.json();
-        if(data.length > 0) {
-          document.getElementById('stats-list').innerHTML = data.map(item => `
+        const list = document.getElementById('stats-list');
+        
+        if(data && data.length > 0) {
+          list.innerHTML = data.map(item => `
             <div class="stat-card">
               <span class="session-badge status-${item.status}">${item.status}</span>
               <div class="id-info">TARGET ID: ${item.id}</div>
@@ -144,7 +156,7 @@
             </div>
           `).join('');
         } else {
-          document.getElementById('stats-list').innerHTML = "";
+          list.innerHTML = "";
         }
       } catch (e) {}
     }, 1500);
